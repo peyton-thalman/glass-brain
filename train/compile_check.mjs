@@ -1,4 +1,4 @@
-// Prove the hand-compiled network equals the MoneyGuide engine: 1,000,000 random returns.
+// Prove the hand-compiled network equals the planning engine: 1,000,000 random returns.
 import { compileLaw, runCompiled, countCompiled, weightDiff } from '../web/js/compile.js';
 import { engineTax, LAW } from '../web/js/taxread.js';
 for (const year of [2025, 2026]) {

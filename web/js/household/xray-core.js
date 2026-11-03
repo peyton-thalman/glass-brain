@@ -1,4 +1,4 @@
-// The Household X-ray: everything here is the real MoneyGuide engine (vendor/planner.js), asked the right questions.
+// The Household X-ray: everything here is the planning engine (vendor/planner.js), asked the right questions.
 // Pure functions of (P = planner bundle, plan, events, facts), so the worker and node checks share them.
 
 import { NOW } from './families.js';

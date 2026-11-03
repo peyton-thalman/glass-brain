@@ -1,4 +1,4 @@
-// Runs the MoneyGuide engine off the main thread so the page never stutters while the X-ray recomputes.
+// Runs the planning engine off the main thread so the page never stutters while the X-ray recomputes.
 import * as P from '../vendor/planner.js';
 import * as X from './xray-core.js';
 

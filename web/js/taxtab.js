@@ -1,5 +1,5 @@
 // Tab 05: the Tax Brain. Three things side by side:
-//   the law (MoneyGuide's 2026 engine), a network compiled from the law by hand (exact),
+//   the law (the 2026 tax engine), a network compiled from the law by hand (exact),
 //   and a network trained on 3M returns that never saw the law (and rediscovered its bends).
 import { TaxBrain, lawKinks, matchKinks, engineTax, engineIrmaa, LAW, ORD_MAX, audit } from './taxread.js';
 import { compileLaw, runCompiled, countCompiled, weightDiff } from './compile.js';
@@ -50,7 +50,7 @@ export class TaxTab {
     L.innerHTML = `
       <div class="sec-label" style="display:block;margin-bottom:8px">Brain under examination</div>
       <div class="seg" data-brains><button data-b="ours" class="on">Ours</button><button data-b="vendor">A vendor's model</button></div>
-      <p class="lawnote" data-bnote>Trained on 3M returns from the MoneyGuide engine.</p>
+      <p class="lawnote" data-bnote>Trained on 3M returns from the planning engine.</p>
       <div class="panel-head"><h2>The household</h2><p>A married couple, both 65+, filing jointly. The x-axis is their IRA, pension and Roth-conversion income.</p></div>
       <div data-sl="ss"></div><div data-sl="ltcg"></div><div data-sl="ord"></div>
       <div class="txread" data-read></div>
@@ -106,7 +106,7 @@ export class TaxTab {
     this.els.left.querySelectorAll('[data-b]').forEach((b) => b.classList.toggle('on', b.dataset.b === which));
     this.els.left.querySelector('[data-bnote]').innerHTML = which === 'vendor'
       ? 'A black box from "a vendor": the same architecture, trained on someone else\'s tax software. Is it right? Audit it from its weights.'
-      : 'Trained on 3M returns from the MoneyGuide engine.';
+      : 'Trained on 3M returns from the planning engine.';
     this.recompute();
   }
 
@@ -220,7 +220,7 @@ export class TaxTab {
       <table class="kt"><thead><tr><th>#</th><th>Where the law bends</th><th>Law</th><th>Brain</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="tx-card">
         <div class="sec-label">The compiled brain</div>
-        <p><b>${c.neurons} neurons · ${c.weights} weights · ${c.layers} layers.</b> No training: every weight was written from the statute. Checked against the MoneyGuide engine on <b>1,000,000 random returns: max error $0.00</b>, for both 2025 and 2026 law.</p>
+        <p><b>${c.neurons} neurons · ${c.weights} weights · ${c.layers} layers.</b> No training: every weight was written from the statute. Checked against the planning engine on <b>1,000,000 random returns: max error $0.00</b>, for both 2025 and 2026 law.</p>
       </div>
       <div class="tx-card audit" data-audit>${this.auditHtml()}</div>
       <div class="tx-card" data-neuron></div>`;
@@ -297,7 +297,7 @@ export class TaxTab {
     const R = this.els.read;
     R.innerHTML = `
       <div><span>IRA / pension income</span><b>${money(ord)}</b></div>
-      <div><span>Federal tax · MoneyGuide engine</span><b>${money(t.federal)}</b></div>
+      <div><span>Federal tax · planning engine</span><b>${money(t.federal)}</b></div>
       <div><span>Compiled brain</span><b class="ok">${money(this.acts.at(-1)[0])}</b></div>
       <div><span>Trained brain</span><b>${money(tb)} <small>${tb - t.federal >= 0 ? '+' : '−'}${money(Math.abs(tb - t.federal))}</small></b></div>
       <div><span>Next dollar taxed at</span><b>${pct(mLaw)} <small>brain ${pct(mBrain)} · bracket ${Math.round(t.bracketRate * 100)}%</small></b></div>
@@ -394,7 +394,7 @@ export class TaxTab {
     // legend
     g.textAlign = 'left'; g.font = '400 10.5px Geist, sans-serif';
     const lg = W < 640 ? [['Law', 'rgba(255,255,255,0.9)'], ['Compiled', '#74c7ff'], ['Trained', '#ffb04a']]
-      : [['The law (MoneyGuide engine)', 'rgba(255,255,255,0.9)'], ['Compiled brain', '#74c7ff'], ['Trained brain', '#ffb04a']];
+      : [['The law (planning engine)', 'rgba(255,255,255,0.9)'], ['Compiled brain', '#74c7ff'], ['Trained brain', '#ffb04a']];
     let lx = 20;
     lg.forEach(([t, c]) => { g.fillStyle = c; g.fillRect(lx, 66, 14, 2); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillText(t, lx + 20, 70); lx += g.measureText(t).width + 40; });
   }

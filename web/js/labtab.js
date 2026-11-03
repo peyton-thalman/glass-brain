@@ -106,7 +106,7 @@ export class LabTab {
         ${g ? tr('Gradient', g, 'grad') : ''}
       </tbody></table>
       <div class="tx-card"><div class="sec-label">The schedule it found</div><div class="sched">${g ? this.best.conv.map((c, t) => (c > 500 ? `<span><i>${this.p.age + t}</i>${k$(c)}</span>` : '')).join('') : ''}</div></div>
-      <div class="tx-card"><div class="sec-label">Why this is new</div><p>Advisors pick conversions with rules of thumb because the tax code isn't differentiable. Here it is: it's a 40-neuron network that matches the MoneyGuide engine to the penny. So a 30-year schedule can be optimized the way neural networks are trained. The gradients are exact: backprop matches finite differences to three decimals.</p>
+      <div class="tx-card"><div class="sec-label">Why this is new</div><p>Advisors pick conversions with rules of thumb because the tax code isn't differentiable. Here it is: it's a 40-neuron network that matches the planning engine to the penny. So a 30-year schedule can be optimized the way neural networks are trained. The gradients are exact: backprop matches finite differences to three decimals.</p>
       <p class="muted" style="margin-top:8px">Deterministic growth, 2026 law held fixed in today's dollars, no discounting, federal tax only. IRMAA counts in the totals but isn't in the gradient (it's a staircase).</p></div>`;
   }
 

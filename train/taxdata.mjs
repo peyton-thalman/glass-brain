@@ -1,4 +1,4 @@
-// Training data for the Tax Brain: 2026 federal tax returns from the MoneyGuide engine
+// Training data for the Tax Brain: 2026 federal tax returns from the planning engine
 // (web/js/vendor/taxlaw.js, bundled from ~/moneyguide/src/engine/tax.ts).
 // A married couple, both 65+, 2026 law. Inputs: ordinary income (IRA/pension/Roth conversions),
 // Social Security benefits, long-term gains + qualified dividends.

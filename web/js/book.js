@@ -71,7 +71,7 @@ export class Book {
     this.aum = this.hh.reduce((s, h) => s + h.portfolio, 0);
   }
 
-  // ---------- MoneyGuide-engine mode: households with real account structure, scored by the Engine Brain ----------
+  // ---------- planning-engine mode: households with real account structure, scored by the Engine Brain ----------
   setEngine(mg, engineRun) {
     this.mg = mg;
     this.engineRun = engineRun;
@@ -271,7 +271,7 @@ export class Book {
     // title
     g.textAlign = 'left';
     g.font = 'italic 400 26px "Instrument Serif", serif'; g.fillStyle = '#ece7dc';
-    g.fillText(`${this.list.length.toLocaleString()} households · ${money(this.engineMode ? this.aumE : this.aum)}${this.engineMode ? ' · MoneyGuide engine' : ''}`, 22, 38);
+    g.fillText(`${this.list.length.toLocaleString()} households · ${money(this.engineMode ? this.aumE : this.aum)}${this.engineMode ? ' · planning engine' : ''}`, 22, 38);
     g.font = '400 10.5px "Geist Mono", monospace'; g.fillStyle = 'rgba(255,255,255,0.45)';
     g.fillText(this.w > 760 ? 'EVERY DOT IS A HOUSEHOLD · SIZE = ASSETS · HEIGHT = CHANCE THE MONEY LASTS' : 'DOT = HOUSEHOLD · SIZE = ASSETS', 22, 58);
 
@@ -313,7 +313,7 @@ export class Book {
   }
 
   modeSeg() {
-    return `<div class="seg" data-bm><button data-m="world" class="${this.engineMode ? '' : 'on'}">Simulated world</button><button data-m="engine" class="${this.engineMode ? 'on' : ''}" ${this.mg ? '' : 'disabled'}>MoneyGuide engine</button></div>`;
+    return `<div class="seg" data-bm><button data-m="world" class="${this.engineMode ? '' : 'on'}">Simulated world</button><button data-m="engine" class="${this.engineMode ? 'on' : ''}" ${this.mg ? '' : 'disabled'}>planning engine</button></div>`;
   }
   wireSeg() {
     this.stats.querySelectorAll('[data-m]').forEach((b) => { b.onclick = () => this.setMode(b.dataset.m); });

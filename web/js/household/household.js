@@ -1,5 +1,5 @@
 // The Household X-ray page: a real household in, and out comes what breaks the plan, why, and the gentlest fix.
-// The intake edits a plain "facts" object; every change re-runs the MoneyGuide engine in two workers.
+// The intake edits a plain "facts" object; every change re-runs the planning engine in two workers.
 
 import * as P from '../vendor/planner.js';
 import { FAMILIES, toPlan, PORTFOLIO_NAMES, NOW } from './families.js';
@@ -561,7 +561,7 @@ function renderInsights() {
   el.innerHTML = `
     <div class="hx-kicker"><span class="n">05</span> Also worth a conversation</div>
     <h2>What the engine's own review <em>found</em></h2>
-    <p class="hx-lede">The MoneyGuide insight engine's scan of this household under today's assumptions: Social Security timing, Roth conversions, IRMAA, the survivor's tax bracket, cash reserves.</p>
+    <p class="hx-lede">The planning engine's scan of this household under today's assumptions: Social Security timing, Roth conversions, IRMAA, the survivor's tax bracket, cash reserves.</p>
     <div class="ins">${list.map((i) => `
       <div class="in-card"><div class="cat ${i.kind}">${esc(i.category)}</div><h4>${esc(i.title)}</h4><p>${esc(i.detail)}</p>${i.impact ? `<div class="imp">${esc(i.impact)}</div>` : ''}</div>`).join('') || '<p class="hx-lede">Nothing flagged.</p>'}</div>`;
 }
@@ -601,7 +601,7 @@ function renderBrief() {
     ${ins.length ? `<h2>Worth discussing</h2><ul>${ins.map((i) => `<li><b>${esc(i.title)}.</b> ${esc(i.detail)}</li>`).join('')}</ul>` : ''}
     <h2>Questions to ask</h2>
     <ul>${briefQuestions(f, events()).map((q) => `<li>${esc(q)}</li>`).join('')}</ul>
-    <p class="br-fine">Prepared with the MoneyGuide planning engine under 2026 federal law (1,000 simulated markets; historical returns 1928–2025; SSA mortality; Arizona flat tax). Projections are hypothetical, not guarantees. Education and decision support, not personal advice.</p>`;
+    <p class="br-fine">Prepared with the planning engine under 2026 federal law (1,000 simulated markets; historical returns 1928–2025; SSA mortality; Arizona flat tax). Projections are hypothetical, not guarantees. Education and decision support, not personal advice.</p>`;
 }
 
 function printBrief() {

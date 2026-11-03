@@ -1,4 +1,4 @@
-// Training data for the MoneyGuide Brain: real plans run through the real MoneyGuide engine
+// Training data for the Engine Brain: real plans run through the planning engine
 // (train/mg/moneyguide.mjs, bundled from ~/moneyguide/src). A retired married couple built on the engine's
 // own Chen sample household, varied across ten facts. Each plan gets a 500-trial Monte Carlo under 2026 law.
 // Runs across all CPU cores with worker threads.

@@ -1,4 +1,4 @@
-"""Train the MoneyGuide Brain: a neural surrogate of the real MoneyGuide planning engine.
+"""Train the Engine Brain: a neural surrogate of the planning engine.
 
 Input: ten facts about a retired couple (ages, IRA/Roth/taxable balances, spending, Social Security, claim age,
 portfolio, state tax). Target: the engine's probability of success (500-trial Monte Carlo under 2026 tax law,

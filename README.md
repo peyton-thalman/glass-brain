@@ -12,7 +12,7 @@ The generated training datasets (`train/*.f32`, `*.npz`, `mg_data.json`, `roth_d
 
 ## Household X-ray (`household.html`)
 
-The front door. Pick one of four made-up households (the kind an advisor meets in a 55+ town outside Phoenix), edit anything about them, and the real MoneyGuide engine answers: what breaks this plan, why, and the gentlest fix.
+The front door. Pick one of four made-up households (the kind an advisor meets in a 55+ town outside Phoenix), edit anything about them, and the planning engine answers: what breaks this plan, why, and the gentlest fix.
 
 - **Deep intake.** Ages and health for each spouse, Social Security already claimed or not, pensions with their survivor option (single-life, 50%, 75%, 100%), part-time work, every account type, the house and whether they'd downsize, everyday spending and what it drops to for a survivor, goals with end dates, gifts, legacy, all-in fees, and *what matters to them*: whether they could trim in a bad year, what they care about most, and their biggest worry.
 - **What breaks it.** Every real start year since 1928 replayed, with real returns and inflation. For all four households, the failures share one cause: the failed retirements averaged −2.5% to −3% a year after inflation in their first decade. After year ten they earned *more* than the retirements that worked. The page says that in plain English and shows each year's path.
@@ -39,8 +39,8 @@ The whole book, live. 4,000 households (the four named families plus 3,996 made 
 | Brain | Learned from | What it shows |
 |---|---|---|
 | **Retirement Brain** (tabs 01–04) | 102M simulated lives (a simple Monte Carlo) | Every neuron visible and named, with first-person explanations traced by activation patching, the training replay, weight-surgery challenges, and a 4,000-household book scored in about 20 ms |
-| **Tax Brain** (tab 05) | 3M federal returns from the **MoneyGuide engine** (2026 law, IRS Rev. Proc. 2025-32, P.L. 119-21) | The trained hinges land on the law's real bend points (24%→32% bracket: **$3 off**, 0% capital-gains ceiling: **$52 off**), plus a network **compiled from the statute by hand** that is exact |
-| **Engine Brain** (tab 06) | 60k real plans run through the **MoneyGuide planning engine** (taxes, RMDs, IRMAA, Social Security) | A full planning engine in microseconds, checked live against the real engine in the browser, and what a dollar is worth in an IRA vs. a Roth, read from its gradients |
+| **Tax Brain** (tab 05) | 3M federal returns from the **planning engine** (2026 law, IRS Rev. Proc. 2025-32, P.L. 119-21) | The trained hinges land on the law's real bend points (24%→32% bracket: **$3 off**, 0% capital-gains ceiling: **$52 off**), plus a network **compiled from the statute by hand** that is exact |
+| **Engine Brain** (tab 06) | 60k real plans run through the **planning engine** (taxes, RMDs, IRMAA, Social Security) | A full planning engine in microseconds, checked live against the real engine in the browser, and what a dollar is worth in an IRA vs. a Roth, read from its gradients |
 
 ## The flagship: Money Finder (tab 08)
 
@@ -57,20 +57,20 @@ Click any family for its nightmare market, the history chart, the exact optimize
 1. **Think:** the Retirement Brain thinking live, with first-person explanations traced by activation patching.
 2. **Birth:** its whole training, replayed from random static to expert.
 3. **Surgery:** six weight-editing challenges, each with a par from a real solver.
-4. **Book:** 4,000 households scored at once. Its *MoneyGuide engine* mode scores them with the Engine Brain, runs book-wide what-ifs (everyone delays Social Security, trims spending, takes more risk), gives each at-risk family its best single move, and spot-checks itself against the real engine (about 0.2–0.5 points average gap).
+4. **Book:** 4,000 households scored at once. Its *planning engine* mode scores them with the Engine Brain, runs book-wide what-ifs (everyone delays Social Security, trims spending, takes more risk), gives each at-risk family its best single move, and spot-checks itself against the real engine (about 0.2–0.5 points average gap).
 5. **Tax Code:** the trained Tax Brain, the compiled law network, Congress mode, hinge patching, and the vendor-model audit.
-6. **Engine:** the Engine Brain against the live MoneyGuide engine: claim-age and spending curves, what a dollar is worth by account type, and the *gentlest path to 85%*. It searches hundreds of plan variations on the brain in milliseconds, then the real engine confirms the winner.
+6. **Engine:** the Engine Brain against the live planning engine: claim-age and spending curves, what a dollar is worth by account type, and the *gentlest path to 85%*. It searches hundreds of plan variations on the brain in milliseconds, then the real engine confirms the winner.
 7. **Roth Lab:** gradient descent through the compiled tax code to find a multi-year conversion schedule, compared against the fill-the-bracket rules.
 8. **Money Finder:** see above.
 
 ## The headline results
 
-- **Tax law → neural network compiler** (`web/js/compile.js`). The 2026 federal income tax for a 65+ married couple, written by hand as a **40-neuron, 8-layer ReLU network** with no training. Every neuron is one clause: the IRC §86 provisional-income tests, the Pub 915 worksheet, the OBBBA senior deduction phase-out, the brackets, capital-gains stacking and the §1411 NIIT. Verified against the MoneyGuide engine on **1,000,000 random returns: max error $0.00**, for both 2025 and 2026 law (`node train/compile_check.mjs`).
+- **Tax law → neural network compiler** (`web/js/compile.js`). The 2026 federal income tax for a 65+ married couple, written by hand as a **40-neuron, 8-layer ReLU network** with no training. Every neuron is one clause: the IRC §86 provisional-income tests, the Pub 915 worksheet, the OBBBA senior deduction phase-out, the brackets, capital-gains stacking and the §1411 NIIT. Verified against the planning engine on **1,000,000 random returns: max error $0.00**, for both 2025 and 2026 law (`node train/compile_check.mjs`).
 - **A law change is a weight diff.** The whole 2025 → 2026 update compiles to exactly **11 bias edits**. In tab 05 you can be Congress: move a bracket, the deduction, or the never-indexed 1993 Social Security threshold, and watch the weights change. You can then **patch the trained brain** by moving its hinge biases instead of retraining it.
 - **The trained Tax Brain rediscovered the law.** It's a single layer of 96 ReLU hinges trained on the tax and its slope (Sobolev training). Each hinge's bend point can be read straight from its weights in dollars, and most land on real kinks in the law. It also found the **tax torpedo**, where an extra $1 of IRA income is taxed at 22% in the 10% bracket, without being told about Social Security taxation.
 - **Model audit from the weights.** A "vendor" brain trained on software that missed the OBBBA senior deduction is caught by comparing its hinges to four candidate versions of the law. The audit names the bug without running the model on any client.
 - **Roth conversions by gradient descent.** Lifetime tax is differentiable once the tax code is a network: backprop through the compiled net gives each year's exact marginal rate (it matches finite differences to 3 decimals), and an adjoint carries future RMD and heir taxes back in time. For a $2M-IRA couple it beats the best fill-the-bracket rule by about $70k. For a $4M IRA with 35% heirs, the gap is about $520k (`node train/roth_check.mjs`). The model is deliberately simple: deterministic growth, 2026 law held constant, no discounting, and IRMAA counted but not in the gradient.
-- **The Engine Brain** reproduces MoneyGuide's probability of success in microseconds instead of tens of milliseconds, and its gradients answer the asset-location question: what a dollar in a traditional IRA is worth next to a Roth dollar for this specific couple.
+- **The Engine Brain** reproduces the engine's probability of success in microseconds instead of tens of milliseconds, and its gradients answer the asset-location question: what a dollar in a traditional IRA is worth next to a Roth dollar for this specific couple.
 
 ## Layout
 
@@ -79,12 +79,12 @@ serve.py                    no-cache static server
 train/sim.py, train.py      Retirement Brain: GPU Monte Carlo (PyTorch/MPS) → 8→24→24→12→3 MLP with 57 training snapshots
 train/probe.py              reads every neuron (firing, concept correlations, vote, share of each instinct)
 train/solve_challenges.mjs  greedy solver that proves the surgery challenges are solvable
-train/taxdata.mjs           3M returns from the MoneyGuide tax engine (and a buggy variant for the audit)
+train/taxdata.mjs           3M returns from the planning engine (and a buggy variant for the audit)
 train/taxtrain.py           Tax Brain: 96 hinges, Sobolev-trained on tax + marginal rate
 train/taxread.mjs           law kinks vs brain hinges, printed
 train/audit.mjs             audit both tax brains against four candidate laws
 train/compile_check.mjs     compiled network vs engine on 1M returns, plus the 2025→2026 weight diff
-train/mgdata.mjs            60k plans through the real MoneyGuide engine on 7 worker threads
+train/mgdata.mjs            60k plans through the planning engine on 7 worker threads
 train/mgtrain.py            Engine Brain: 10→64→64→32→2 SiLU network (0.9 pts test error)
 train/roth_check.mjs        gradient check + gradient-descent Roth schedules vs the bracket rules
 web/js/roth.js              unrolled retirement, backprop through the tax network, adjoint, optimizer
@@ -102,7 +102,7 @@ web/js/taxread.js           law kink finder, hinge reader, kink matcher, auditor
 
 ## Honest caveats
 
-- The Retirement Brain's world (tabs 01–04) is a deliberately simple market and mortality model. Tabs 05–06 use the real MoneyGuide engine.
+- The Retirement Brain's world (tabs 01–04) is a deliberately simple market and mortality model. Tabs 05–06 use the planning engine.
 - The Tax Brain covers federal income tax for a married couple, both 65+, filing jointly, with three income types and no state tax. The compiled network is exact within that scope.
 - Small law kinks that sit right next to bigger ones (the 22→24% edge beside the senior-deduction phase-out) aren't always resolved by the trained brain. The table shows those misses honestly.
 - Everything here is education and decision support, not advice.

@@ -1,4 +1,4 @@
-// A retired married couple on the MoneyGuide engine's own Chen sample household, varied across ten facts.
+// A retired married couple on the planning engine's own Chen sample household, varied across ten facts.
 // Shared by the training-data generator (train/mgdata.mjs) and the browser, so both build identical plans.
 export const FEATURES = [
   ['age', 60, 75], ['spouseGap', -6, 2], ['ira', 0, 4_000_000], ['roth', 0, 1_500_000], ['taxable', 0, 2_000_000],

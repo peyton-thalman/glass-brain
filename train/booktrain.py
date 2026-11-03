@@ -1,6 +1,6 @@
 """Train the Book Brain: one network that reads a whole household (34 facts) and answers seven questions at once.
 
-Targets are the MoneyGuide engine's probability of success for the plan as it is and under six life events
+Targets are the planning engine's probability of success for the plan as it is and under six life events
 (either spouse dying, three years of care, another crash, the 2033 Social Security cut, hotter inflation), each a
 300-trial Monte Carlo labeled by the Household X-ray's own code (train/bookdata.mjs). Singles have no spouse-death
 labels; those are masked out of the loss. SiLU keeps the network smooth so its gradients can explain a household.

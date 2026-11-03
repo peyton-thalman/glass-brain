@@ -1,4 +1,4 @@
-"""Train the Tax Brain on 3M returns from the MoneyGuide 2026 tax engine.
+"""Train the Tax Brain on 3M returns from the 2026 tax engine.
 
 One hidden layer of ReLU hinges, so the brain is literally a sum of hinges:
     tax(x) = c + sum_j v_j * relu(w_j . x + b_j)

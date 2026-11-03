@@ -1,4 +1,4 @@
-// Entry for web/js/vendor/planner.js: the MoneyGuide engine plus its analysis layer.
+// Entry for web/js/vendor/planner.js: the planning engine plus its analysis layer.
 // Built by train/vendor/build.sh from ~/moneyguide/src. The Household X-ray runs on this.
 export { simulate, probability, people, fullRetirementAge, START_YEAR } from '../../../../moneyguide/src/engine/sim';
 export { normalizePlan, sampleHouseholds, PORTFOLIOS } from '../../../../moneyguide/src/data';

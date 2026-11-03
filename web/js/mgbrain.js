@@ -1,4 +1,4 @@
-// The MoneyGuide Brain: a smooth (SiLU) network trained to reproduce the MoneyGuide engine's probability of success.
+// The Engine Brain: a smooth (SiLU) network trained to reproduce the planning engine's probability of success.
 export class MGBrain {
   constructor(d) {
     this.d = d;

@@ -495,7 +495,7 @@ function renderTrust() {
   $('#trust').innerHTML = `
     <div class="hx-kicker"><span class="n">Trust</span> How much to believe the brain</div>
     <h2>A neural network you can <em>check</em>.</h2>
-    <p class="hx-lede">The Book Brain learned the MoneyGuide engine from ${st.households.toLocaleString()} made-up households, each run through the engine under all seven scenarios (${st.trials} markets each). It never decides anything on its own: every number above can be checked against the engine with one click.</p>
+    <p class="hx-lede">The Book Brain learned the planning engine from ${st.households.toLocaleString()} made-up households, each run through the engine under all seven scenarios (${st.trials} markets each). It never decides anything on its own: every number above can be checked against the engine with one click.</p>
     <div class="bk-tgrid">
       <div class="bk-stat"><span class="l">Error on ${st.testHouseholds.toLocaleString()} households it never saw</span><b>${st.testMAE[0].toFixed(1)} pts</b><div class="d">average; ${st.testMAE.slice(1).map((v) => v.toFixed(1)).join(' / ')} on the six life events</div></div>
       <div class="bk-stat"><span class="l">This whole book at the plan date, against the engine at ${S.trials.toLocaleString()} markets each</span><b>${(gap / n).toFixed(1)} pts</b><div class="d">average gap over all ${n.toLocaleString()} households; 90% within ${p90.toFixed(1)} pts</div></div>
@@ -557,7 +557,7 @@ async function startStory() {
   const e = S.eps[covid];
   const trough = e.close.indexOf(Math.min(...e.close));
   spot('.bk-market');
-  say(2, N, 'Now the next 23 trading days, one frame per day. A neural network trained on the MoneyGuide engine re-scores all 4,000 households under seven scenarios every frame.');
+  say(2, N, 'Now the next 23 trading days, one frame per day. A neural network trained on the planning engine re-scores all 4,000 households under seven scenarios every frame.');
   if (!(await wait(2500, id))) return;
   play(true, trough);
   await until(() => !S.playing, id);

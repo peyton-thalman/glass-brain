@@ -1,4 +1,4 @@
-// Training data for the Book Brain: made-up households run through the MoneyGuide engine under seven scenarios,
+// Training data for the Book Brain: made-up households run through the planning engine under seven scenarios,
 // using the same functions as the Household X-ray (xray-core.js), so every label is what the X-ray would show.
 // Half the households get a random market move first, so the brain sees plans after crashes and rallies.
 //   node train/bookdata.mjs [households=40000] [trials=300] [shockShare=0.5] [out=train/book_data.json] [seed=7000]

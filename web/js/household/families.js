@@ -2,7 +2,7 @@
 // None of them is a real client. Each is built to show one way a plan breaks that a single
 // probability number hides: a single-life pension, a care event, a bad first decade, or no cushion at all.
 //
-// The intake (household.js) edits these "facts" objects; toPlan() turns facts into a MoneyGuide engine Plan.
+// The intake (household.js) edits these "facts" objects; toPlan() turns facts into a planning engine Plan.
 
 export const NOW = 2026;
 
@@ -76,7 +76,7 @@ export const PORTFOLIO_NAMES = ['Cash', 'Conservative', 'Mod. conservative', 'Mo
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
-/** Turn intake facts into a MoneyGuide engine Plan. `P` is the planner bundle (for normalizePlan). */
+/** Turn intake facts into a planning engine Plan. `P` is the planner bundle (for normalizePlan). */
 export function toPlan(P, f) {
   const person = (p, i) => ({
     firstName: p.first, lastName: f.name.split(' ').pop(), birthYear: NOW - p.age, sex: p.sex, health: p.health,

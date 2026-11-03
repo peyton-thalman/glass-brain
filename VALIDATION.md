@@ -8,7 +8,7 @@ bash train/validate.sh
 
 ## Ground truth
 
-Tabs 05–07 use the **MoneyGuide engine** itself (`~/moneyguide/src`), bundled with esbuild into `web/js/vendor/`:
+Tabs 05–07 use the **planning engine** itself (`~/moneyguide/src`), bundled with esbuild into `web/js/vendor/`:
 
 - `taxlaw.js` is `engine/tax.ts` + `law.ts`: 2026 federal law (IRS Rev. Proc. 2025-32, P.L. 119-21), plus 2025 law.
 - `moneyguide.js` is `engine/sim.ts` + `data.ts`: the full planning engine (Monte Carlo, taxes, RMDs, IRMAA, Social Security).
@@ -39,13 +39,13 @@ Its world is a simple model: normal returns (stocks 6.5% ± 17%, bonds 1.8% ± 6
 
 Scope: married filing jointly, both 65+, federal income tax, with three income types (ordinary, Social Security, long-term gains and qualified dividends). The trained brain misses some small kinks that sit right next to larger ones, and the app's table shows each miss.
 
-## Engine Brain (tab 06, and Book → MoneyGuide engine)
+## Engine Brain (tab 06, and Book → planning engine)
 
 | Claim | Measured | How |
 |---|---|---|
 | Learned the planning engine | **0.91 pts** mean error, 2.0 p90, on 3,000 held-out plans (60,000 plans × 500 trials) | `node train/mgdata.mjs 60000 500` then `python3 train/mgtrain.py` |
 | Live agreement in the browser | default household: brain **70%** vs engine **70%** | Engine tab |
-| Book spot-check | **0.2 pts** average gap on 24 random households run through the real engine in the browser | Book → MoneyGuide engine |
+| Book spot-check | **0.2 pts** average gap on 24 random households run through the real engine in the browser | Book → planning engine |
 | A dollar's worth by account | IRA $0.89 vs engine $0.88, taxable $0.99 vs $1.00 (default household); IRA $0.57 vs $0.58 (Chens, legacy basis) | Engine tab |
 | Gentlest path to 85% is real | "Retiring at 62": 720 candidate plans searched on the brain in ~20–60 ms, best = spend $7k/yr less → brain **86%**, real engine **85%**. Chens: spend $9k/yr less → brain 85%, engine **84%** | Engine tab (the engine runs the chosen plan live) |
 | Where it disagrees | Chens, taxable dollar: brain $0.83 vs engine $1.00. Shown in the app's table as it is | Engine tab → The Chens |
@@ -69,7 +69,7 @@ Model: deterministic real growth, 2026 law held constant, no discounting, federa
 | Gradients stay exact with spending draws | −0.305 vs −0.305 (finite difference) | `node train/roth_check.mjs` |
 | β (FORM) agrees with simulation | importance sampling at the design point (2,000 paths) vs plain Monte Carlo (20,000): 17.5% ± 0.5 vs 17.3% · 16.4% ± 0.4 vs 16.3% · 48.2% ± 0.9 vs 48.9% · 4.1% ± 0.1 vs 4.4%. FORM's Φ(−β) runs low (first-order), and the app shows all three | `node train/stress_check.mjs` |
 | Rare-event risk | "comfortable" couple: importance sampling (4,000 paths) **1 in 17,898**. Plain Monte Carlo needs 200,000 paths to see 9 failures (4.5 × 10⁻⁵) | see `stress_check.mjs` |
-| History replay | real 1928–2025 returns and CPI from MoneyGuide's `history.ts`. β's projection rule matches the exact replay in 56–72 of 65–72 windows depending on the plan | same |
+| History replay | real 1928–2025 returns and CPI from the engine's `history.ts`. β's projection rule matches the exact replay in 56–72 of 65–72 windows depending on the plan | same |
 
 Stress model: a single portfolio (stocks and bonds at the family's mix), with withdrawals grossed up for federal tax using the compiled network. The pre-tax share is held constant. No guardrails. Normal shocks are calibrated to 1928–2025 real returns (S&P 8.6% ± 19.3%, Treasuries 1.8% ± 8.9%, correlation 0.09).
 
@@ -77,7 +77,7 @@ Stress model: a single portfolio (stocks and bonds at the family's mix), with wi
 
 | Claim | Measured | How |
 |---|---|---|
-| Every X-ray number is the engine's | the page calls the MoneyGuide engine (bundled as `web/js/vendor/planner.js`) in a worker; no surrogate | `node train/xray_check.mjs` prints the four families' headline numbers |
+| Every X-ray number is the engine's | the page calls the planning engine (bundled as `web/js/vendor/planner.js`) in a worker; no surrogate | `node train/xray_check.mjs` prints the four families' headline numbers |
 | Failed historical retirements fail in the first decade | all four families: failed start years averaged −2.5% to −3.1% a year after inflation in years 1–10, and earned more than the successful years after year 10 | same |
 | The Book Brain matches the engine | **1.4 pts** mean error on 3,000 held-out households (1.4–1.8 across the seven scenarios); 90% within 3.9 pts, 99% within 15.6 | `python3 train/booktrain.py` (60,000 households from `train/bookdata.mjs`) |
 | …on the demo book | 4,000 households at the plan date against the engine at 1,000 markets each | the trust panel on `book.html` computes it live |

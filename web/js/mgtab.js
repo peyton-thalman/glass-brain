@@ -1,4 +1,4 @@
-// Tab 06: the MoneyGuide Brain, a neural surrogate of the real MoneyGuide planning engine, checked live against it.
+// Tab 06: the Engine Brain, a neural surrogate of the planning engine, checked live against it.
 import { MGBrain } from './mgbrain.js';
 import { makePlan, FEATURES } from './mgplan.js';
 import * as M from './vendor/moneyguide.js';
@@ -42,7 +42,7 @@ export class MGTab {
 
   buildLeft() {
     const L = this.els.left;
-    L.innerHTML = `<div class="panel-head"><h2>The household</h2><p>A retired couple, run through the <b>real MoneyGuide engine</b>: 2026 tax law, RMDs, IRMAA, Social Security rules.</p></div>
+    L.innerHTML = `<div class="panel-head"><h2>The household</h2><p>A retired couple, run through the <b>real planning engine</b>: 2026 tax law, RMDs, IRMAA, Social Security rules.</p></div>
       <div class="presets">${PRESETS.map(([n], i) => `<button data-p="${i}">${n}</button>`).join('')}</div><div data-sliders></div>`;
     L.querySelectorAll('[data-p]').forEach((b) => { b.onclick = () => { this.f = { ...PRESETS[+b.dataset.p][1] }; this.sync(); this.update(true); }; });
     const wrap = $('[data-sliders]', L);
@@ -176,9 +176,9 @@ export class MGTab {
       return `<tr><td>${name}</td><td>${b === null ? '—' : `$${b.toFixed(2)}`}</td><td>${en === null ? (ev ? '—' : '<i class="spin"></i>') : `$${en.toFixed(2)}`}</td></tr>`;
     };
     R.innerHTML = `
-      <div class="verdict-label">The MoneyGuide Brain says</div>
+      <div class="verdict-label">The Engine Brain says</div>
       <div class="verdict-big"><span>${this.p.toFixed(0)}</span><small>%</small></div>
-      <div class="verdict-cap">probability of success, in MoneyGuide's own terms</div>
+      <div class="verdict-cap">probability of success, in the engine's own terms</div>
       <div class="truth">
         <div class="truth-row"><span>The real engine (500 trials)</span><b>${e ? `${e.p.toFixed(0)}%` : '…'}</b></div>
         <div class="truth-row"><span>Brain vs. engine</span><b class="${e && Math.abs(this.p - e.p) < 4 ? 'ok' : ''}">${e ? `${this.p - e.p >= 0 ? '+' : '−'}${Math.abs(this.p - e.p).toFixed(1)} pts` : '…'}</b></div>
@@ -192,7 +192,7 @@ export class MGTab {
         ${row('roth', 'Roth IRA')}${row('taxable', 'Taxable brokerage')}${row('ira', 'Traditional IRA')}</tbody></table>
         <p class="xr-note">${this.xrSentence(v, key)}</p>
       </div>
-      <div class="tx-card"><div class="sec-label">How it was made</div><p>${this.stats.plans.toLocaleString()} plans built on MoneyGuide's own sample household and run through the real engine, ${this.stats.trials} Monte Carlo trials each, across 7 CPU cores. Then a 10→64→64→32 network learned the whole engine. Average error on plans it never saw: <b>${this.stats.testMAE.toFixed(1)} pts</b>.</p></div>`;
+      <div class="tx-card"><div class="sec-label">How it was made</div><p>${this.stats.plans.toLocaleString()} plans built on the engine's own sample household and run through the real engine, ${this.stats.trials} Monte Carlo trials each, across 7 CPU cores. Then a 10→64→64→32 network learned the whole engine. Average error on plans it never saw: <b>${this.stats.testMAE.toFixed(1)} pts</b>.</p></div>`;
   }
 
   pathHtml() {
@@ -266,7 +266,7 @@ export class MGTab {
     // legend
     const ly = W > 720 ? y0 + 32 : y0 + 64;
     g.textAlign = 'right'; g.font = '400 10.5px Geist, sans-serif';
-    g.fillStyle = '#ffb04a'; g.fillRect(W - padR - 190, ly - 4, 14, 2); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillText('MoneyGuide Brain', W - padR - 100, ly);
+    g.fillStyle = '#ffb04a'; g.fillRect(W - padR - 190, ly - 4, 14, 2); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillText('Engine Brain', W - padR - 100, ly);
     g.beginPath(); g.arc(W - padR - 86, ly - 3, 3.5, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); g.fillStyle = 'rgba(255,255,255,0.6)'; g.fillText('real engine', W - padR, ly);
   }
 }

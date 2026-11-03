@@ -1,0 +1,30 @@
+{
+  "id": "alvarez",
+  "title": "Rick & Sue",
+  "blurb": "Just retired with a big 401(k). They disagree about what they spend.",
+  "made_up": true,
+  "notes": "Rick & Sue Alvarez - first meeting after retirement, 10/27\nRick 65 (engineer, retired in April), Sue 63 (nurse, retired too). Both healthy, Sue says \"excellent\" - runs half marathons.\nNeither has claimed SS. Rick's statement shows $3,600/mo at FRA, plans to claim at 67. Sue's is $2,100, she wants to start at 64.\nRick's 401k rolled to IRA: $1.55M. Sue's 403b/IRA: $380k. Roth $90k. Brokerage $260k (basis ~$200k). Cash $80k.\nHouse in Peoria ~$520k, paid off.\n\nSpending: Rick says $9,000/mo. Sue jumped in: \"with the travel and the cabin it's more like eleven.\" Need to pin this down - ask for 3 months of card statements.\nTravel budget $25k/yr for the next 10 years. Cabin in Wisconsin costs about $9k/yr, they'll keep it 15 years.\nMod. aggressive allocation, they want growth. Rick's worry is a market crash right as they start. Priority is enjoying it now while healthy. Would trim some if markets fell.\nRick read an article about Roth conversions before RMDs - wants to know how much to convert and whether to do it before Medicare.\nNo pensions. No LTC insurance.",
+  "key": {
+    "facts": {
+      "people.0.age": 65,
+      "people.1.age": 63,
+      "people.0.ssMonthly": 3600,
+      "people.0.claimAge": 67,
+      "people.1.claimAge": 64,
+      "accounts.ira.0": 1550000,
+      "accounts.ira.1": 380000,
+      "accounts.roth": 90000
+    },
+    "unclear": [
+      "spending.core"
+    ],
+    "asks": [
+      "spend|statement"
+    ],
+    "topics": [
+      "roth_conversion"
+    ],
+    "removed": 0,
+    "forbid": []
+  }
+}

@@ -1,7 +1,30 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "glass-brain", "runtimeExecutable": "python3", "runtimeArgs": ["serve.py"], "port": 8787 },
-    { "name": "glass-brain-test", "runtimeExecutable": "python3", "runtimeArgs": ["serve.py"], "port": 8790, "env": { "PORT": "8790" } }
+    {
+      "name": "glass-brain",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--with",
+        "anthropic",
+        "serve.py"
+      ],
+      "port": 8787
+    },
+    {
+      "name": "glass-brain-test",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--with",
+        "anthropic",
+        "serve.py"
+      ],
+      "port": 8790,
+      "env": {
+        "PORT": "8790"
+      }
+    }
   ]
 }

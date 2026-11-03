@@ -6,7 +6,8 @@
   "bundles": {
     "planner.js": "engine + analysis + insights: the Household, Book and Firm X-ray run on this",
     "moneyguide.js": "engine/sim.ts + data.ts: the Engine Brain (lab tab 06) is labeled by and checked against this",
-    "taxlaw.js": "engine/tax.ts + law.ts: 2026 and 2025 federal law (IRS Rev. Proc. 2025-32, P.L. 119-21), for the Tax Brain, the compiler and the Roth Lab"
+    "taxlaw.js": "engine/tax.ts + law.ts: 2026 and 2025 federal law (IRS Rev. Proc. 2025-32, P.L. 119-21), for the Tax Brain, the compiler and the Roth Lab",
+    "scenario.js": "plain/check.ts: the engine's plain-English front door (Roth, Social Security timing, IRMAA, RMDs, QCDs), for Meeting prep"
   },
   "files": [
     "src/data.ts",
@@ -19,5 +20,41 @@
     "src/engine/sim.ts",
     "src/engine/tax.ts",
     "src/format.ts"
-  ]
+  ],
+  "scenario": {
+    "fingerprint": "c97c55d22ead9f9c",
+    "files": [
+      "node_modules/zod/index.js",
+      "node_modules/zod/v3/ZodError.js",
+      "node_modules/zod/v3/errors.js",
+      "node_modules/zod/v3/external.js",
+      "node_modules/zod/v3/helpers/errorUtil.js",
+      "node_modules/zod/v3/helpers/parseUtil.js",
+      "node_modules/zod/v3/helpers/typeAliases.js",
+      "node_modules/zod/v3/helpers/util.js",
+      "node_modules/zod/v3/locales/en.js",
+      "node_modules/zod/v3/types.js",
+      "src/engine/cma.ts",
+      "src/engine/history.ts",
+      "src/engine/law.ts",
+      "src/engine/mortality.ts",
+      "src/engine/sim.ts",
+      "src/engine/tax.ts",
+      "src/plain/check.ts",
+      "src/plain/convert.ts",
+      "src/plain/guard.ts",
+      "src/plain/sample.ts",
+      "src/plain/schema.ts",
+      "src/scenario/followups.ts",
+      "src/scenario/params.ts",
+      "src/scenario/pia.ts",
+      "src/scenario/returns.ts",
+      "src/scenario/rmd.ts",
+      "src/scenario/run.ts",
+      "src/scenario/socialSecurity.ts",
+      "src/scenario/solve.ts",
+      "src/scenario/tables.ts",
+      "src/scenario/trace.ts"
+    ]
+  }
 }

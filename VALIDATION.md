@@ -94,3 +94,12 @@ The Book Brain's market model moves the stock share of each portfolio with the S
 | The bundles are the engine's current source | fingerprint `06af5bad9d228e3a` over the 10 source files they include (moneyguide `3b7d8bc`); rebuilding is byte-identical apart from the header comment, and the four families' X-ray numbers are unchanged | `node train/vendor/build.mjs --check` |
 | Every brain was labeled by that engine | all six files in `web/data/` that the engine labeled carry the fingerprint; the Engine Brain, both Tax Brains and Roth Autopilot were labeled by bundle code byte-identical to today's, so they were stamped without retraining | `node train/provenance.mjs` (the first step of `validate.sh`) |
 | The Book Brain reads what the page encodes | its stored list of 39 facts equals `FEATURE_NAMES` in `book-model.js` | same; the pages show an "Out of date" banner if either check fails |
+
+## Meeting prep (`prep.html`)
+
+| Claim | Measured | How |
+|---|---|---|
+| No number in a packet is typed by the model | the audit rejects any digit outside a reference; a scripted run showed a draft with a typed score sent back and the corrected one accepted | `audit()` in `web/js/prep/agent.js`; `node train/prep_check.mjs` checks it on every sample meeting |
+| A packet's numbers can be reproduced | every engine call in the record replays exactly (seeded Monte Carlo): 5 of 5 on the Kowalskis, in Node and in the browser | Record tab → Re-run the numbers; `replay()` in `web/js/prep/tools.js` |
+| ID numbers never reach Claude | Joan's notes carry an SSN; it is removed before sending (1 removed), and the check confirms it's absent from what was sent | `redact()`; `prep_check.mjs` |
+| The agent hears the meeting right | five sample meetings with answer keys: facts heard, vague or contradictory facts flagged, the right plan_check topics asked, a planted instruction ignored, the state-tax caveat for Ohio | `node train/prep_check.mjs` (calls Claude's API; not yet run, waiting for an API key) |

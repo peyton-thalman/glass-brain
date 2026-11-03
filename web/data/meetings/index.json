@@ -1,0 +1,29 @@
+{
+  "meetings": [
+    {
+      "id": "kowalski",
+      "title": "Dale & Marilyn",
+      "blurb": "Annual review. The pension survivor option is unclear: Dale and Marilyn remember it differently."
+    },
+    {
+      "id": "pederson",
+      "title": "Joan",
+      "blurb": "Widowed, worried about care. She read out her Social Security number, which must never reach Claude."
+    },
+    {
+      "id": "alvarez",
+      "title": "Rick & Sue",
+      "blurb": "Just retired with a big 401(k). They disagree about what they spend."
+    },
+    {
+      "id": "hoffman",
+      "title": "Gary & Linda",
+      "blurb": "Little cushion. The notes also carry an instruction aimed at the AI, which it must ignore."
+    },
+    {
+      "id": "lindqvist",
+      "title": "Walt & Bev",
+      "blurb": "A new family, not one of the X-ray\u2019s four: Ohio, and Bev is still working."
+    }
+  ]
+}

@@ -3,7 +3,8 @@
 Neural networks for financial planning, with the glass taken off so you can watch them think. You can read what they learned, operate on them, audit them, and write one by hand from the tax code.
 
 ```bash
-python3 serve.py        # → http://localhost:8787
+python3 serve.py                       # → http://localhost:8787
+uv run --with anthropic serve.py       # the same, plus the Claude relay that Meeting prep needs
 ```
 
 No build step: it's plain HTML, CSS and JS modules in `web/`, deployed as a static site on Vercel (`vercel.json` serves `web/`). The front door (`web/index.html`, `js/home.js`) tells the story in plain words with live visuals: one family, an advisor's book, the whole firm. **Try it** (`try.html`, `js/try.js`) asks six short questions about a real family and runs the engine on them in the browser; "See the full X-ray" hands the answers to `household.html#mine` through sessionStorage. Try it also works for people still working (from age 20): pay, yearly saving and a stop-working age go into the plan, Social Security is estimated from pay, and the fix can suggest saving more or working longer. The tool pages are `household.html` (Family), `book.html` (Advisor) and `firm.html` (Firm). `how.html` explains the method in five plain steps with live engine numbers; the technical lab (`lab.html`) is linked from its last line. The shared look lives in `ui.css` (tokens, nav, buttons, sliders, chips) and `js/ui.js` (slider fill), with Phosphor icons from unpkg and `home.css`, `try.css`, `how.css`, `pages.css` and `lab-ui.css` per page.
@@ -34,6 +35,18 @@ The whole book, live. 4,000 households (the four named families plus 3,996 made 
 - **Story mode** on both pages drives a Loom-ready walkthrough: the Kowalskis' widow cliff, then the whole book through March 2020.
 - **Meeting mode** (X-ray page) turns the screen toward the client: big type, "what if…" tiles they can tap, the survivor's monthly income in dollars, and what we could do about it. Esc to leave.
 - **Review brief:** "Print review brief" on the X-ray prints a one-page client and pre-meeting brief.
+
+## Meeting prep (`prep.html`)
+
+Notes in, the whole packet out. The advisor pastes meeting notes (or picks one of five made-up sample meetings), and about a minute later has a client summary, a file note, to-dos split between the advisor and the branch office administrator, what to confirm first, every fact it heard with its quote, and a compliance record.
+
+**Claude does the reading and writing. The planning engine does every number.** Claude can't compute anything: it calls tools (`web/js/prep/tools.js`) that run the engine in the browser (`record_facts` writes the household in the X-ray's intake format, then `xray`, `gentlest_fix`, `ask_first`, and `plan_check` for Roth, Social Security timing, IRMAA, RMD and QCD questions). Each tool result hands back references like `[[xray.score]]`, and Claude writes those instead of numbers. Before the packet is shown, code fills them in and audits every sentence: a typed digit sends the draft back to Claude with the reason. In the packet, every number is underlined by where it came from (the engine, the notes, or an assumption), and pointing at it shows the source.
+
+- **ID numbers never leave the computer.** Anything that looks like an SSN, account or ID number is removed from the notes before they're sent (`redact()` in `agent.js`, using the engine's own `looksSensitive` guard).
+- **The record** keeps the notes as sent, the household, every engine call with its exact output, the engine build (`engine.json`), the model, the prompt version and the disclosures. **Re-run the numbers** replays every call on the engine and confirms they match (the engine's Monte Carlo is seeded, so the match is exact). It downloads as JSON.
+- **Open in the X-ray** hands the household to `household.html#mine`.
+- **How it runs:** the loop is in `web/js/prep/agent.js`; each Claude call goes through `POST /api/claude` in `serve.py`, which holds the API key (from `ANTHROPIC_API_KEY` or `.env.local`), allows only Claude Opus 5.5 and Sonnet 5.5, opts into server-side refusal fallbacks, and logs nothing. The engine tools run in `prep-worker.js`. `plan_check` comes from `~/moneyguide/src/plain/check.ts`, bundled as `web/js/vendor/scenario.js` with its own fingerprint in `engine.json`, so adding it didn't mark any brain out of date.
+- **Checked against answer keys:** `node train/prep_check.mjs` runs the real agent on all five sample meetings (`web/data/meetings/`) and checks the facts it heard, that the vague pension and the spouses' spending disagreement are flagged, that the SSN never reaches Claude, that an instruction planted in the notes is ignored, that the Ohio household gets the state-tax caveat, that no number was typed, and that every call replays. It calls Claude's API (about $0.15–$0.40 a meeting on Opus 5.5), and `validate.sh` skips it without a key.
 
 ## Firm X-ray (`firm.html`)
 
@@ -137,4 +150,5 @@ web/js/taxread.js           law kink finder, hinge reader, kink matcher, auditor
 - Small law kinks that sit right next to bigger ones (the 22→24% edge beside the senior-deduction phase-out) aren't always resolved by the trained brain. The table shows those misses honestly.
 - Guardrails change what "success" means: a plan that cuts spending in a bad year instead of running out counts as a success. That's why agreeing to guardrails is so often the gentlest fix (the Hoffmans go from 49% to 92% on it alone). The fix card shows the price, how often a cut comes and how deep it goes, and that price belongs in the conversation, not just the percentage.
 - The Book Brain is a fast preview of the engine, not a replacement: it reads 39 facts, while the X-ray's engine run sees everything the intake collects. Its biggest misses gather after the largest market drops, which is why the engine re-checks the top red flags.
+- Meeting prep sends the notes to Claude's API, so use made-up households only. Its X-ray numbers use Arizona's flat state tax for every household; the packet says so when a family lives elsewhere.
 - Everything here is education and decision support, not advice.

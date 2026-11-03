@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeting prep · Glass Brain</title>
+<meta name="description" content="Paste meeting notes and get the client summary, file note, to-dos, what to confirm and a compliance record. Claude does the reading and writing; the planning engine does every number.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23000'/%3E%3Ccircle cx='7.5' cy='14' r='2.2' fill='%238d90ff'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%23fff'/%3E%3Ccircle cx='16.5' cy='14' r='2.2' fill='%234cc38a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="js/ui.js" defer></script>
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="prep.css">
+</head>
+<body>
+<nav class="gb-nav" aria-label="Main">
+  <a class="gb-logo" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M7.5 14 12 8l4.5 6" stroke="currentColor" stroke-opacity=".5" fill="none"/><circle cx="7.5" cy="14" r="2" fill="#8d90ff"/><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="#4cc38a"/></svg><span>Glass Brain</span></a>
+  <a class="gb-link" href="household.html">Family</a>
+  <a class="gb-link" href="prep.html" aria-current="page">Meeting prep</a>
+  <a class="gb-link" href="book.html">Advisor</a>
+  <a class="gb-link" href="firm.html">Firm</a>
+  <a class="gb-link opt" href="how.html">How it works</a>
+  <a class="gb-cta" href="try.html">Try it</a>
+</nav>
+
+<header class="gb-intro">
+  <p class="gb-eyebrow">After the meeting</p>
+  <h1>Notes in. The whole packet out.</h1>
+  <p>Paste your meeting notes. Claude reads them and writes the client summary, the file note and the to-dos. The planning engine does every number, and the page proves it: point at any number to see where it came from.</p>
+</header>
+
+<div class="gb-steps">
+  <div><b><i>1</i>Paste the notes</b><p>Messy is fine. Anything that looks like an ID or account number is taken out before it leaves this computer.</p></div>
+  <div><b><i>2</i>The engine runs it</b><p>What breaks the plan, the gentlest fix, Roth and Social Security questions, and what to confirm first.</p></div>
+  <div><b><i>3</i>Check it, then use it</b><p>Every fact shows its quote from the notes. The record re-runs every number on the engine.</p></div>
+</div>
+
+<main class="pp-main">
+  <section class="pp-card" id="input" aria-label="Meeting notes">
+    <div class="pp-head">
+      <h2>Meeting notes</h2>
+      <div class="pp-samples" id="samples" role="group" aria-label="Sample meetings"></div>
+    </div>
+    <textarea id="notes" spellcheck="false" placeholder="Paste or type your notes from the meeting…"></textarea>
+    <div class="pp-row">
+      <label class="pp-model">Model
+        <select id="model">
+          <option value="claude-opus-5-5">Claude Opus 5.5</option>
+          <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (faster, cheaper)</option>
+        </select>
+      </label>
+      <button class="gb-btn lg" id="go"><i class="ph ph-sparkle"></i>Build the packet</button>
+    </div>
+    <p class="pp-fine"><i class="ph ph-info"></i> The notes go to Claude's API through the server on this computer. The math runs in this tab. Use made-up households only, never a real client's details.</p>
+    <p class="pp-redacted" id="redacted" hidden></p>
+  </section>
+
+  <section class="pp-card" id="progress" aria-live="polite" hidden>
+    <h2>Working on it</h2>
+    <ol class="pp-steps" id="steps"></ol>
+  </section>
+
+  <section id="packet" hidden></section>
+</main>
+
+<div class="pp-tip" id="tip" role="tooltip" hidden></div>
+
+<footer class="gb-foot">
+  <span>Claude writes the words; the planning engine computes every number (2026 federal law, Arizona flat state tax). Projections are hypothetical, not guarantees. Education and decision support, not personal advice.</span>
+  <nav><a href="./">Home</a><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a></nav>
+</footer>
+
+<script type="module" src="js/prep/prep.js"></script>
+</body>
+</html>

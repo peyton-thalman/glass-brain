@@ -1,0 +1,29 @@
+{
+  "id": "lindqvist",
+  "title": "Walt & Bev",
+  "blurb": "A new family, not one of the X-ray\u2019s four: Ohio, and Bev is still working.",
+  "made_up": true,
+  "notes": "New prospect: Walt & Bev Lindqvist (referral from the Hoffmans), 10/31\nLive outside Columbus, Ohio. Walt 66, retired from the county in June. Bev 61, still working as a school administrator, makes about $82k, wants to work until 65. She puts about $12k a year in her 403b.\nWalt's county pension: $2,450/mo, small COLA. He picked the 100% joint and survivor option - showed me the letter.\nWalt claimed SS at 66, $2,350/mo. Bev's statement: $1,900/mo at full retirement age, thinking 67.\nWalt's 457 + IRA together about $310k. Bev's 403b $240k. They have a joint brokerage, maybe $60k, no idea on cost basis. Emergency fund $35k.\nHouse ~$295k, still a small mortgage (didn't get the balance).\nSpend around $6,000/mo now. Big goal: help their granddaughter with college, $10k/yr for 4 years starting 2031. A trip to Sweden next year, $15k.\nConservative investor - Bev hates watching it drop. Biggest worry for Bev is a crash. Walt cares most that Bev is okay. Could maybe trim a little.\nWalt asked when Bev should take Social Security.",
+  "key": {
+    "facts": {
+      "people.0.age": 66,
+      "people.1.age": 61,
+      "people.1.salary": 82000,
+      "pensions.0.monthly": 2450,
+      "pensions.0.survivorPct": 100,
+      "people.0.ssMonthly": 2350,
+      "accounts.ira.0": 310000,
+      "accounts.ira.1": 240000,
+      "spending.core": 6000
+    },
+    "unclear": [],
+    "asks": [
+      "Ohio|state"
+    ],
+    "topics": [
+      "social_security_timing"
+    ],
+    "removed": 0,
+    "forbid": []
+  }
+}

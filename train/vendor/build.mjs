@@ -42,6 +42,13 @@ export { normalizePlan, sampleHouseholds } from ${JSON.stringify(src('data'))};`
     entry: `export * from ${JSON.stringify(src('engine/law'))};
 export * from ${JSON.stringify(src('engine/tax'))};`,
   },
+  {
+    // Its own fingerprint (engine.json "scenario"), so adding it never marks the trained brains out of date.
+    file: 'scenario.js', minify: true, separate: true,
+    what: 'plain/check.ts: the engine\'s plain-English front door (Roth, Social Security timing, IRMAA, RMDs, QCDs), for Meeting prep',
+    entry: `export { planCheck } from ${JSON.stringify(src('plain/check'))};
+export { looksSensitive, REJECTED } from ${JSON.stringify(src('plain/guard'))};`,
+  },
 ];
 
 const require = createRequire(path.join(MG, 'package.json'));
@@ -68,7 +75,9 @@ function fingerprint(inputs) {
 const check = process.argv.includes('--check');
 const inputs = {};
 for (const b of BUNDLES) inputs[b.file] = await bundle(b, !check);
-const fp = fingerprint(Object.values(inputs).flat());
+const main = BUNDLES.filter((b) => !b.separate), extra = BUNDLES.filter((b) => b.separate);
+const fp = fingerprint(main.flatMap((b) => inputs[b.file]));
+const sfp = fingerprint(extra.flatMap((b) => inputs[b.file]));
 
 if (check) {
   const m = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
@@ -76,14 +85,19 @@ if (check) {
     console.log(`engine source changed: bundles were built from ${m.fingerprint}, ~/moneyguide/src is now ${fp}. Run node train/vendor/build.mjs, then retrain.`);
     process.exit(1);
   }
-  console.log(`bundles match ~/moneyguide/src (${fp})`);
+  if (m.scenario && m.scenario.fingerprint !== sfp) {
+    console.log(`plan_check source changed: scenario.js was built from ${m.scenario.fingerprint}, ~/moneyguide/src is now ${sfp}. Run node train/vendor/build.mjs.`);
+    process.exit(1);
+  }
+  console.log(`bundles match ~/moneyguide/src (${fp}${m.scenario ? `, plan_check ${sfp}` : ''})`);
 } else {
   let commit = null, dirty = null;
   try {
     commit = execSync('git rev-parse --short HEAD', { cwd: MG }).toString().trim();
     dirty = execSync('git status --porcelain -- src', { cwd: MG }).toString().trim() !== '';
   } catch {}
-  const files = [...new Set(Object.values(inputs).flat())].sort();
-  fs.writeFileSync(MANIFEST, JSON.stringify({ fingerprint: fp, commit, dirty, builtAt: new Date().toISOString().slice(0, 10), bundles: Object.fromEntries(BUNDLES.map((b) => [b.file, b.what])), files }, null, 2) + '\n');
+  const files = [...new Set(main.flatMap((b) => inputs[b.file]))].sort();
+  const scenario = { fingerprint: sfp, files: [...new Set(extra.flatMap((b) => inputs[b.file]))].sort() };
+  fs.writeFileSync(MANIFEST, JSON.stringify({ fingerprint: fp, commit, dirty, builtAt: new Date().toISOString().slice(0, 10), bundles: Object.fromEntries(BUNDLES.map((b) => [b.file, b.what])), files, scenario }, null, 2) + '\n');
   console.log(`built ${BUNDLES.map((b) => b.file).join(', ')} from ${files.length} files → engine ${fp}${commit ? ` (moneyguide ${commit}${dirty ? ', uncommitted changes' : ''})` : ''}`);
 }

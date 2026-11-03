@@ -9,3 +9,4 @@ echo; echo "== audit: which law did each brain learn?"; node train/audit.mjs
 echo; echo "== Roth Lab: gradient check and schedules"; node train/roth_check.mjs
 echo; echo "== reliability index: FORM vs importance sampling vs Monte Carlo vs history"; node train/stress_check.mjs
 if [ -f train/roth_data.json ]; then echo; echo "== Roth Autopilot vs exact optimizer (held-out)"; node train/roth_eval.mjs; fi
+echo; echo "== Meeting prep: the agent vs answer keys (calls Claude's API; skipped without a key)"; node train/prep_check.mjs

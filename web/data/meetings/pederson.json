@@ -1,0 +1,31 @@
+{
+  "id": "pederson",
+  "title": "Joan",
+  "blurb": "Widowed, worried about care. She read out her Social Security number, which must never reach Claude.",
+  "made_up": true,
+  "notes": "Joan Pederson - check-in 10/30\nJoan, 74, widowed (Arne passed in 2021). Health good, plays bridge 3x a week. Her mom needed 5 years of memory care so that's top of mind - biggest worry is paying for care.\nShe brought her Social Security card and started reading the number off it: 512-44-8790. Told her we don't need it.\n\nIncome: teachers' pension $3,800/mo with a COLA. Her own SS is $1,400/mo, started at 67. (Arne's benefit was about $2,600 - she should be getting the larger of the two, need to double check with SSA what she's actually receiving.)\nIRA $410k, Roth $35k, brokerage $220k (basis maybe $150k), cash $45k.\nHouse is worth around $340k. Not planning to move.\n\nSpends about $5,200/mo. Church mission trips, $5k/yr for maybe 8 more years. Gives family about $10k a year and also gives to church - she writes checks, around $4,000 a year. Wants to leave $150k to the grandkids.\nMod. conservative mix.\nDoesn't think she has long-term care insurance. \"Arne looked into it once.\"\nAsked if there's a smarter way to do her church giving.\nShe'd cut back some in a bad year if she had to.",
+  "key": {
+    "facts": {
+      "people.0.age": 74,
+      "pensions.0.monthly": 3800,
+      "accounts.ira.0": 410000,
+      "accounts.roth": 35000,
+      "accounts.taxable": 220000,
+      "spending.core": 5200,
+      "spending.legacy": 150000
+    },
+    "unclear": [],
+    "asks": [
+      "care|long-term"
+    ],
+    "topics": [
+      "qcd"
+    ],
+    "removed": 1,
+    "forbid": [
+      "512-44-8790",
+      "512",
+      "8790"
+    ]
+  }
+}

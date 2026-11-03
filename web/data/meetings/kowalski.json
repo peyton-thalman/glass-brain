@@ -1,0 +1,32 @@
+{
+  "id": "kowalski",
+  "title": "Dale & Marilyn",
+  "blurb": "Annual review. The pension survivor option is unclear: Dale and Marilyn remember it differently.",
+  "made_up": true,
+  "notes": "Annual review - Dale & Marilyn Kowalski, Tues 10/28\nBoth came in. Dale 78, Marilyn 71. Dale's knee is better, says health is \"fine for an old guy\". Marilyn walks every morning, good health.\n\nIncome: Dale's auto-plant pension is $3,100/mo, no cost of living raise. SS: Dale gets $2,900/mo (started at 65), Marilyn $1,150 (took it at 62).\nPension question came up again. Dale: \"I took the bigger check, the single one.\" Marilyn thinks the pension \"keeps going for me if something happens to him\". They don't agree - neither has the election paperwork handy.\n\nAccounts: Dale IRA ~$640k, Marilyn IRA $85k. Joint brokerage about $120k, they think they paid around $90k for it. $60k in CDs/savings at the credit union. No Roth.\nHouse in Sun City West, worth maybe $385k, paid off. No plans to move.\n\nSpending about $6,500 a month. Trips to see the grandkids in Michigan, ~$9k a year, want to keep that up another 10 years or so. Give the kids about $6k/yr total at Christmas/birthdays.\nModerate portfolio, they're comfortable where it is.\n\nMarilyn's big worry is being left alone without enough. She said if Dale goes first she wants to stay in the house. Dale's priority is \"making sure Marilyn is OK\". They'd trim a little in a bad year, not a lot.\nDale asked whether he should be doing anything with his IRA for taxes since the RMDs keep going up.\nNo long-term care policy that either of them mentioned - didn't get to it.",
+  "key": {
+    "facts": {
+      "people.0.age": 78,
+      "people.1.age": 71,
+      "pensions.0.monthly": 3100,
+      "people.0.ssMonthly": 2900,
+      "people.1.ssMonthly": 1150,
+      "accounts.ira.0": 640000,
+      "accounts.ira.1": 85000,
+      "accounts.taxable": 120000,
+      "accounts.cash": 60000,
+      "spending.core": 6500
+    },
+    "unclear": [
+      "pensions.0.survivorPct"
+    ],
+    "asks": [
+      "pension|survivor|single"
+    ],
+    "topics": [
+      "roth_conversion|rmd"
+    ],
+    "removed": 0,
+    "forbid": []
+  }
+}

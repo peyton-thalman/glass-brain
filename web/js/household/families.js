@@ -31,6 +31,7 @@ export const FAMILIES = [
     people: [
       { first: 'Joan', age: 74, sex: 'F', health: 'good', planTo: 97, retiredAt: 60, ssMonthly: 1400, claimAge: 67 },
     ],
+    marital: 'widowed', late: { first: 'Arne', born: 1947, died: 2021 },
     pensions: [{ name: 'Teachers retirement pension', owner: 0, monthly: 3800, cola: true, survivorPct: 0 }],
     accounts: { ira: [410000], roth: 35000, taxable: 220000, basis: 150000, cash: 45000 },
     home: { value: 340000, open: false, downsize: false, downsizeYear: 2032, netProceeds: 150000 },
@@ -78,10 +79,12 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
 
 /** Turn intake facts into a planning engine Plan. `P` is the planner bundle (for normalizePlan). */
 export function toPlan(P, f) {
+  // A widow(er) can take the larger of their own benefit and the survivor benefit from the late spouse's record.
+  const late = f.people.length === 1 && f.marital === 'widowed' && f.late ? f.late.ssMonthly || 0 : 0;
   const person = (p, i) => ({
     firstName: p.first, lastName: f.name.split(' ').pop(), birthYear: NOW - p.age, sex: p.sex, health: p.health,
     retirementAge: p.retiredAt, acceptableRetirementAge: p.retiredAt, planningAge: Math.max(p.planTo, p.age + 1),
-    salary: 0, ssPia: p.ssMonthly, ssClaimAge: p.claimAge, lifeInsurance: 0,
+    salary: 0, ssPia: i === 0 ? Math.max(p.ssMonthly, late) : p.ssMonthly, ssClaimAge: p.claimAge, lifeInsurance: 0,
   });
   const owner = (i) => (i === 0 ? 'client' : 'spouse');
   const a = f.accounts;
@@ -105,7 +108,7 @@ export function toPlan(P, f) {
   ];
   const income = f.pensions.map((p, i) => ({
     id: 'pen' + i, name: p.name, owner: owner(p.owner), annualAmount: p.monthly * 12,
-    startAge: Math.min(f.people[p.owner].age, f.people[p.owner].retiredAt), endAge: p.endAge ?? 0, cola: p.cola, survivorPct: p.survivorPct,
+    startAge: Math.min(f.people[p.owner].age, f.people[p.owner].retiredAt), endAge: p.endAge ?? 0, cola: p.cola, survivorPct: p.survivorPct < 0 ? 50 : p.survivorPct,
   }));
   const plan = {
     client: person(f.people[0], 0),
@@ -120,5 +123,8 @@ export function toPlan(P, f) {
     },
     riskAnswers: [2, 2, 2, 2, 2],
   };
-  return P.normalizePlan(clone(plan));
+  const out = P.normalizePlan(clone(plan));
+  // Not an engine field: xray-core reads it to net a care policy's benefit out of a care event.
+  if (f.ltc && f.ltc.has === 'yes') out.ltcPolicy = { daily: f.ltc.daily || 0, years: f.ltc.years || 0, rider: !!f.ltc.rider, careAge: f.people[0].age };
+  return out;
 }

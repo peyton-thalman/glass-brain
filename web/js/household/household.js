@@ -69,6 +69,7 @@ async function run(scope) {
   slow({ type: 'fix', plan: pl, ev, facts }, (s) => { if (live()) { S.r.fixStep = s.step; S.r.fixP = s.p; renderFix(); } }).then((f) => { if (live()) { S.r.fix = f; renderFix(); renderMeeting(); } });
   slow({ type: 'sens', plan: pl, ev }).then((s) => { if (live()) { S.r.sens = s; renderSens(); } });
   if (scope === 'facts') slow({ type: 'insights', plan: pl }).then((i) => { if (live()) { S.r.insights = i; renderInsights(); } });
+  if (scope === 'facts') fast({ type: 'questions', facts }).then((q) => { if (live()) { S.r.questions = q; renderAsk(); } });
 }
 
 // ---------------------------------------------------------------- families
@@ -101,7 +102,7 @@ function load(id, facts, hash, note) {
 // ---------------------------------------------------------------- intake
 
 const HEALTH = [['poor', 'Poor'], ['average', 'Average'], ['good', 'Good'], ['excellent', 'Excellent']];
-const SURV = [[0, 'Stops at death (single-life)'], [50, '50% to survivor'], [75, '75% to survivor'], [100, '100% to survivor']];
+const SURV = [[-1, 'Not sure yet'], [0, 'Stops at death (single-life)'], [50, '50% to survivor'], [75, '75% to survivor'], [100, '100% to survivor']];
 
 const field = (label, path, value, kind = 'num', extra = '') => {
   const input = `<input data-k="${path}" data-t="${kind}" type="${kind === 'text' ? 'text' : 'number'}" value="${esc(value ?? '')}" ${extra}>`;
@@ -121,7 +122,13 @@ function renderIntake() {
       <div class="in-person-h"><input data-k="people.${i}.first" data-t="text" value="${esc(p.first)}" aria-label="Name">${i === 1 ? '<button class="in-x" data-act="rmSpouse" title="Remove">×</button>' : ''}</div>
       <div class="in-row three">${field('Age', `people.${i}.age`, p.age)}${field('Plan to age', `people.${i}.planTo`, p.planTo)}${select('Health', `people.${i}.health`, p.health, HEALTH)}</div>
       <div class="in-row three">${field('Retired at', `people.${i}.retiredAt`, p.retiredAt)}${field('SS at full age /mo', `people.${i}.ssMonthly`, p.ssMonthly, 'money')}${field(p.claimAge <= p.age ? 'Claimed at' : 'Will claim at', `people.${i}.claimAge`, p.claimAge)}</div>
-    </div>`).join('') + (two ? '' : '<button class="in-add" data-act="addSpouse">+ Add a spouse</button>');
+    </div>`).join('') + (two ? '' : `
+    ${seg('Marital status', 'marital', f.marital || 'single', [['single', 'Single'], ['widowed', 'Widowed'], ['divorced', 'Divorced']])}
+    ${f.marital === 'widowed' ? `<div class="in-item"><div class="in-item-h"><span class="in-req">Late spouse</span></div>
+      <div class="in-row three">${field('First name', 'late.first', f.late?.first ?? '', 'text')}${field('Born (year)', 'late.born', f.late?.born ?? '', 'opt')}${field('Died (year)', 'late.died', f.late?.died ?? '', 'opt')}</div>
+      <div class="in-row">${field('Their SS at full age /mo', 'late.ssMonthly', f.late?.ssMonthly ?? '', 'opt', 'placeholder="needed"')}${select('Survivor benefit', 'late.taking', f.late?.taking ?? 'unsure', [['unsure', 'Not sure'], ['yes', 'Taking it now'], ['no', 'Not yet']])}</div>
+      <div class="in-hint">A widow(er) can take the larger of their own benefit and the survivor benefit on the late spouse's record. The engine uses the larger.</div></div>` : ''}
+    <button class="in-add" data-act="addSpouse">+ Add a spouse</button>`);
   const pensions = f.pensions.map((x, i) => `
     <div class="in-item">
       <div class="in-item-h"><input data-k="pensions.${i}.name" data-t="text" value="${esc(x.name)}" aria-label="Income name"><button class="in-x" data-act="rmPension" data-i="${i}" title="Remove">×</button></div>
@@ -137,6 +144,7 @@ function renderIntake() {
   const fe = f.feelings;
   const html = `
     <div class="in-story"><h3>${esc(f.name)}</h3>${S.note ? `<div class="hx-kicker" style="margin:2px 0 6px"><span class="n">${esc(S.note)}</span></div>` : ''}${esc(f.story)}</div>
+    <div class="in-ask" id="ask"></div>
     ${sec('People', ppl.map((p) => `${esc(p.first)} ${p.age}`).join(' · '), people, true)}
     ${sec('Income', f.pensions.length ? compact(f.pensions.reduce((s, x) => s + x.monthly, 0)) + '/mo + SS' : 'Social Security only', pensions)}
     ${sec('Savings', compact(totalSave), `
@@ -154,6 +162,10 @@ function renderIntake() {
       ${wants}
       <div class="in-row">${field('Gifts to family per year', 'spending.gifts', f.spending.gifts, 'money')}${field('Want to leave heirs', 'spending.legacy', f.spending.legacy, 'money')}</div>
       <div class="in-hint">Medicare premiums and taxes are added by the engine. Don't include them here.</div>`)}
+    ${sec('Long-term care', f.ltc?.has === 'yes' ? `policy ${'$'}${f.ltc.daily || 0}/day` : f.ltc?.has === 'no' ? 'no policy' : 'not asked yet', `
+      ${seg(`Does ${esc(nm[0])} have long-term-care insurance?`, 'ltc.has', f.ltc?.has || 'unsure', [['no', 'No'], ['yes', 'Yes'], ['unsure', 'Not sure']])}
+      ${f.ltc?.has === 'yes' ? `<div class="in-row three">${field('Daily benefit', 'ltc.daily', f.ltc.daily ?? 200, 'money')}${field('Benefit years', 'ltc.years', f.ltc.years ?? 3)}<label class="in-check" style="align-self:end"><input type="checkbox" data-k="ltc.rider" data-t="bool" ${f.ltc.rider ? 'checked' : ''}> 3% inflation rider</label></div>
+      <div class="in-hint">Care is modeled at $110,000 a year in today's dollars, rising 5% a year. The policy pays its daily benefit for up to its benefit years; without a rider, that benefit buys less every year.</div>` : ''}`)}
     ${sec('Investments', `${PORTFOLIO_NAMES[f.invest.portfolio]} · ${f.invest.fees}%`, `
       <div class="in-row">${select('Mix', 'invest.portfolio', f.invest.portfolio, PORTFOLIO_NAMES.map((n, i) => [i, n]).slice(1), 'num')}${field('All-in fees (%/yr)', 'invest.fees', f.invest.fees, 'num', 'step="0.05"')}</div>
       <div class="in-hint">All-in means advisory fee plus fund expenses.</div>`)}
@@ -164,13 +176,36 @@ function renderIntake() {
       <div class="in-hint">These change which fixes the search prefers and which life events it flags.</div>`, true)}
   `;
   $('#intake').innerHTML = html;
+  renderAsk();
   document.querySelectorAll('.in-sec').forEach((d, i) => { if (openState[i] != null) d.open = openState[i]; });
 }
+
+// The facts worth confirming first, ranked by how much the answer could move the plan (scored on the engine).
+function renderAsk() {
+  const el = $('#ask'), qs = S.r.questions;
+  if (!el || !qs) return;
+  const conf = S.facts.confirmed || {}, open = qs.filter((q) => !conf[q.id] && q.swing >= 3), done = qs.filter((q) => conf[q.id]).length;
+  const pct = qs.length ? Math.round(((done + qs.filter((q) => q.swing < 3).length) / qs.length) * 100) : 100;
+  el.innerHTML = `
+    <div class="ask-h"><span>Ask these first</span><span class="ask-m">${pct}% of what matters confirmed</span></div>
+    <div class="ask-bar"><i style="width:${pct}%"></i></div>
+    ${open.slice(0, 4).map((q) => `<div class="ask-q">
+      <div class="ask-t">${esc(q.q)}</div>
+      <div class="ask-s">The answer moves the plan between <b>${q.lo}%</b> and <b>${q.hi}%</b>. ${esc(q.why)}</div>
+      <button class="ask-ok" data-confirm="${q.id}">Confirmed ✓</button>
+    </div>`).join('') || '<div class="ask-s">Everything that could move this plan by 3 points or more is confirmed.</div>'}`;
+}
+$('#intake').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-confirm]');
+  if (!b) return;
+  (S.facts.confirmed ??= {})[b.dataset.confirm] = true;
+  renderAsk();
+});
 
 function setPath(obj, path, v) {
   const k = path.split('.');
   let o = obj;
-  for (let i = 0; i < k.length - 1; i++) o = o[k[i]];
+  for (let i = 0; i < k.length - 1; i++) o = o[k[i]] ??= {};
   o[k[k.length - 1]] = v;
 }
 

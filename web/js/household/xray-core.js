@@ -1,7 +1,7 @@
 // The Household X-ray: everything here is the planning engine (vendor/planner.js), asked the right questions.
 // Pure functions of (P = planner bundle, plan, events, facts), so the worker and node checks share them.
 
-import { NOW } from './families.js';
+import { NOW, toPlan } from './families.js';
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const TR = 300; // trials for search and sensitivity; headline numbers use 1,000
@@ -17,7 +17,13 @@ export function withEvents(plan, ev = {}) {
     const who = p[keys[i]];
     if (age != null && who) who.planningAge = Math.max(NOW - who.birthYear + 1, age);
   });
-  if (ev.ltc != null) stress.ltc = { age: ev.ltc, years: 3, amount: 110000 };
+  if (ev.ltc != null) {
+    // Care costs $110k a year in today's dollars, rising 5% a year. A policy's daily benefit is fixed unless it has a
+    // 3% inflation rider, so in today's dollars it shrinks until care starts; it pays for up to its benefit years.
+    const pol = p.ltcPolicy, yrs = Math.max(0, ev.ltc - (NOW - p.client.birthYear));
+    const covered = pol ? Math.min(110000, pol.daily * 365 * Math.pow((pol.rider ? 1.03 : 1) / 1.05, yrs)) * Math.min(pol.years, 3) / 3 : 0;
+    stress.ltc = { age: ev.ltc, years: 3, amount: Math.round(110000 - covered) };
+  }
   if (ev.crash) stress.badTiming = true;
   if (ev.inflation) stress.extraInflation = 0.01;
   if (ev.ssCut) p.assumptions.ssReduction = true;
@@ -298,4 +304,40 @@ export function describe(a, b, facts) {
   }
   if (a.assumptions.postRetPortfolio !== b.assumptions.postRetPortfolio) out.push({ what: 'Take one step more stock risk', detail: '' });
   return out;
+}
+
+// ---------------------------------------------------------------- what to ask next
+
+/**
+ * The facts worth confirming first: for each one we are unsure of, the engine scores the plausible answers and the
+ * spread between them is how much the answer could move the plan. P is the planner bundle, f the intake facts.
+ */
+export function questions(P, f) {
+  const two = f.people.length === 2, out = [];
+  const pr = (g, ev = {}) => prob(P, toPlan(P, g), eventsFrom(ev), 600);
+  const alt = (mod) => { const g = JSON.parse(JSON.stringify(f)); mod(g); return g; };
+  const ask = (id, q, why, scenarios, ev = {}) => {
+    const ps = scenarios.map((m) => pr(alt(m), ev));
+    out.push({ id, q, why, lo: Math.min(...ps), hi: Math.max(...ps), swing: Math.max(...ps) - Math.min(...ps) });
+  };
+  f.pensions.forEach((pn, k) => {
+    if (!two || pn.endAge != null) return;
+    const who = f.people[pn.owner], other = f.people[1 - pn.owner];
+    ask(`surv${k}`, `If ${who.first} dies first, does the ${pn.name.toLowerCase()} keep paying ${other.first}?`, `Single-life or joint-and-survivor, checked against the pension paperwork. Scored as if ${who.first} died at ${Math.min(who.planTo - 1, who.age + 4)}.`,
+      [(g) => (g.pensions[k].survivorPct = 0), (g) => (g.pensions[k].survivorPct = 100)], { [`death${pn.owner}`]: Math.min(who.planTo - 1, who.age + 4) });
+  });
+  ask('spend', `Is ${'$' + Math.round(f.spending.core).toLocaleString()} a month really what they spend?`, 'Three months of bank and card statements usually settle it. Scored at 15% less and 15% more.',
+    [(g) => (g.spending.core *= 0.85), (g) => (g.spending.core *= 1.15)]);
+  ask('life', 'How long did their parents and grandparents live?', 'Family history and health move the planning age. Scored 5 years shorter and 5 years longer.',
+    [(g) => g.people.forEach((p) => (p.planTo = Math.max(p.age + 2, p.planTo - 5))), (g) => g.people.forEach((p) => (p.planTo += 5))]);
+  const careAge = Math.max(85, f.people[0].age + 3);
+  if (!f.ltc || f.ltc.has !== 'yes') ask('ltc', `Does ${f.people[0].first} have long-term-care insurance?`, `Scored with no policy and with a typical one ($200 a day for 3 years), if care starts at ${careAge}.`,
+    [(g) => (g.ltc = { has: 'no' }), (g) => (g.ltc = { has: 'yes', daily: 200, years: 3, rider: false })], { ltc: careAge });
+  f.people.forEach((p, i) => {
+    if (p.claimAge > p.age) ask(`claim${i}`, `When does ${p.first} really plan to claim Social Security?`, 'Scored claiming at 62 against waiting to 70.',
+      [(g) => (g.people[i].claimAge = Math.max(62, p.age)), (g) => (g.people[i].claimAge = 70)]);
+  });
+  if (!two && f.marital === 'widowed' && (!f.late || !f.late.ssMonthly)) ask('late', 'What was the late spouse\'s Social Security benefit?', 'A survivor can take the larger of their own and the late spouse\'s. Scored at the same as their own and 60% higher.',
+    [(g) => (g.late = { ssMonthly: 0 }), (g) => (g.late = { ssMonthly: Math.round(f.people[0].ssMonthly * 1.6) })]);
+  return out.sort((a, b) => b.swing - a.swing);
 }

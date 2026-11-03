@@ -9,6 +9,7 @@ self.onmessage = ({ data: { id, type, plan, plans, items, evs, ev, facts, who, a
   if (type === 'checkEv') out = items.map((x) => X.prob(P, x.plan, X.eventsFrom(x.ev), 1000));
   else if (type === 'check') out = plans.map((p) => X.prob(P, p, {}, 1000));
   else if (type === 'heads') out = evs.map((e) => (e ? X.prob(P, plan, X.eventsFrom(e), 1000) : null));
+  else if (type === 'questions') out = X.questions(P, facts);
   else if (type === 'verdict') out = X.verdict(P, plan, ev);
   else if (type === 'sens') out = X.sensitivity(P, plan, ev);
   else if (type === 'cliff') out = X.survivorCliff(P, plan, ev, who);

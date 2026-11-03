@@ -453,3 +453,17 @@ body.meeting { overflow: hidden; }
 .mx-tot .mx-l { border-bottom: 0; border-top: 1px solid var(--line-2); margin-top: 4px; }
 .mx-tot .mx-l b { color: var(--amber); }
 @media (max-width: 1100px) { .mx { grid-template-columns: 1fr; } }
+
+/* ask these first */
+.in-ask { padding: 14px 20px 16px; border-bottom: 1px solid var(--line); background: rgba(255,176,74,0.04); }
+.in-ask:empty { display: none; }
+.ask-h { display: flex; justify-content: space-between; font: 500 11px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); }
+.ask-m { color: var(--muted); letter-spacing: 0.04em; text-transform: none; }
+.ask-bar { height: 3px; background: var(--line); border-radius: 2px; margin: 8px 0 10px; overflow: hidden; }
+.ask-bar i { display: block; height: 100%; background: var(--amber); transition: width 0.3s; }
+.ask-q { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 8px; display: grid; gap: 4px; background: var(--bg-2); }
+.ask-t { font-size: 13.5px; }
+.ask-s { font-size: 12px; color: var(--muted); }
+.ask-s b { color: var(--text); font-weight: 500; }
+.ask-ok { justify-self: start; font: 500 11.5px var(--mono); color: var(--good); margin-top: 2px; }
+.in-req { font: 500 12px var(--mono); color: var(--amber); }

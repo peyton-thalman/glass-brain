@@ -3,21 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Book X-ray</title>
+<title>Advisor book · Glass Brain</title>
 <meta name="description" content="4,000 retirement plans re-scored live as the market moves, by a neural network trained on the planning engine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23000'/%3E%3Ccircle cx='7.5' cy='14' r='2.2' fill='%238d90ff'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%23fff'/%3E%3Ccircle cx='16.5' cy='14' r='2.2' fill='%234cc38a'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="household.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="pages.css">
 </head>
 <body>
-<header class="hx-top">
-  <a class="hx-brand" href="./"><span class="hx-word">Glass Brain</span><span class="hx-sep">/</span><span class="hx-page">Book X-ray</span></a>
-  <nav class="hx-nav"><a href="./">One household</a><a href="book.html" class="on">Whole book</a><a href="firm.html">Whole firm</a><a href="lab.html">How it works</a></nav>
-  <button class="btn primary hx-story-btn" id="storyBtn">▶ Story</button>
-  <span class="hx-by">Built by Peyton Thalman</span>
-</header>
+<nav class="gb-nav" aria-label="Main">
+  <a class="gb-logo" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M7.5 14 12 8l4.5 6" stroke="currentColor" stroke-opacity=".5" fill="none"/><circle cx="7.5" cy="14" r="2" fill="#8d90ff"/><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="#4cc38a"/></svg><span>Glass Brain</span></a>
+  <a class="gb-link" href="household.html">Family</a>
+  <a class="gb-link" href="book.html" aria-current="page">Advisor</a>
+  <a class="gb-link" href="firm.html">Firm</a>
+  <a class="gb-link opt" href="lab.html">How it works</a>
+  <a class="gb-cta" href="try.html">Try it</a>
+</nav>
 
+<header class="gb-intro">
+  <p class="gb-eyebrow">For an advisor</p>
+  <h1>Your whole book, re&#8209;checked with every market move.</h1>
+  <p>Each square is one of 4,000 households. Replay a real crash, or drag the market yourself, and watch which plans slip into trouble. Click any square to see that family.</p>
+  <div class="gb-actions">
+    <button class="gb-btn" id="storyBtn">Play the story</button>
+    <button class="gb-btn ghost" id="mondayBtn">This week's calls</button>
+  </div>
+</header>
 <section class="bk-hero">
   <div class="hx-card bk-market">
     <div class="hx-kicker"><span class="n">Live</span> The market</div>
@@ -36,25 +50,33 @@
 <main class="bk-main">
   <section class="hx-card bk-field">
     <div class="hx-kicker"><span class="n">4,000</span> households, one cell each</div>
-    <h2 id="fieldHead">The whole book, <em>re-scored every frame</em></h2>
-    <p class="hx-lede">Each cell is a household, in the same place the whole time, sorted by how safe its plan was on the day it was made. A neural network trained on the planning engine re-scores all 4,000 under seven scenarios every time the market moves. Click any cell.</p>
+    <h2 id="fieldHead">The whole book</h2>
+    <p class="hx-lede">Each square is a family, always in the same spot, safest at the top. Green is on track, amber is worth a look, red needs a call. Click any square.</p>
     <canvas id="field"></canvas>
     <div class="key" id="fieldKey"></div>
   </section>
   <aside class="hx-card bk-flags">
-    <div class="seg bk-tabs" id="tabs"><button data-tab="flags" class="on">Red flags</button><button data-tab="opps">Opportunities</button><button class="bk-monday" id="mondayBtn">Monday brief →</button></div>
+    <div class="seg bk-tabs" id="tabs"><button data-tab="flags" class="on">Red flags</button><button data-tab="opps">Opportunities</button></div>
     <div id="flagList" class="bk-list"></div>
   </aside>
 </main>
 
 <section class="hx-card bk-detail" id="detail" hidden></section>
 
-<section class="hx-card bk-trust" id="trust"></section>
+<details class="gb-more bk-morewrap" id="more">
+  <summary>Can you trust it? How the brain is checked against the engine</summary>
+  <div class="gb-more-body"><section class="hx-card bk-trust" id="trust"></section></div>
+</details>
 
 <footer class="hx-fine bk-foot">
   The households are made up. Replays use real S&amp;P 500 daily closes and 10-year Treasury yields (FRED series SP500 and DGS10):
   the stock share of each portfolio moves with the index, the bond share with the yield, and cash is held flat. Dragging the slider moves stocks only. Every red flag can be checked against the real engine on its card.
   This is education and decision support, not personal advice.
+</footer>
+
+<footer class="gb-foot">
+  <span>Glass Brain · built by Peyton Thalman · education and decision support, not personal advice</span>
+  <nav><a href="./">Home</a><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a><a href="lab.html">How it works</a></nav>
 </footer>
 
 <section class="meet" id="monday" hidden></section>

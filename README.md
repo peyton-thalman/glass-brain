@@ -6,11 +6,11 @@ Neural networks for financial planning, with the glass taken off so you can watc
 python3 serve.py        # → http://localhost:8787
 ```
 
-No build step: it's plain HTML, CSS and JS modules in `web/`, deployed as a static site on Vercel (`vercel.json` serves `web/`). The front door (`web/index.html`) is the Household X-ray; **Story** on it and on the Book X-ray drives a walkthrough. The research lab the X-ray grew out of lives at `lab.html` ("How it works"), with its own **▶ Tour**.
+No build step: it's plain HTML, CSS and JS modules in `web/`, deployed as a static site on Vercel (`vercel.json` serves `web/`). The front door (`web/index.html`, `js/home.js`) tells the story in plain words with live visuals: one family, an advisor's book, the whole firm. **Try it** (`try.html`, `js/try.js`) asks six short questions about a real family and runs the engine on them in the browser; "See the full X-ray" hands the answers to `household.html#mine` through sessionStorage. The tool pages are `household.html` (Family), `book.html` (Advisor), `firm.html` (Firm) and `lab.html` (How it works). The shared look lives in `ui.css` (tokens, nav, buttons), with `home.css`, `try.css`, `pages.css` and `lab-ui.css` per page.
 
 The generated training datasets (`train/*.f32`, `*.npz`, `mg_data.json`, `roth_data.json`, `book_data*.json`) are not in git. Rebuild them with the data scripts in `train/` (`taxdata.mjs`, `sim.py`, `mgdata.mjs`, `rothdata.mjs`, `bookdata.mjs`) before retraining or running `train/validate.sh`.
 
-## Household X-ray (`index.html`, the front door)
+## Household X-ray (`household.html`)
 
 The front door. Pick one of four made-up households (the kind an advisor meets in a 55+ town outside Phoenix), edit anything about them, and the planning engine answers: what breaks this plan, why, and the gentlest fix.
 

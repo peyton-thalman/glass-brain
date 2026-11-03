@@ -3,34 +3,43 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Glass Brain Lab</title>
+<title>How it works · Glass Brain</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="lab-ui.css">
 </head>
 <body>
 <div id="boot"><div class="boot-mark">Glass Brain</div><div class="boot-sub">waking the brain…</div></div>
 
+<div class="lab-top">
+<nav class="gb-nav" aria-label="Main">
+  <a class="gb-logo" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M7.5 14 12 8l4.5 6" stroke="currentColor" stroke-opacity=".5" fill="none"/><circle cx="7.5" cy="14" r="2" fill="#8d90ff"/><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="#4cc38a"/></svg><span>Glass Brain</span></a>
+  <a class="gb-link" href="household.html">Family</a>
+  <a class="gb-link" href="book.html">Advisor</a>
+  <a class="gb-link" href="firm.html">Firm</a>
+  <a class="gb-link opt" href="lab.html" aria-current="page">How it works</a>
+  <a class="gb-cta" href="try.html">Try it</a>
+</nav>
 <header class="top">
-  <div class="mark">
-    <span class="mark-word">Glass Brain</span>
-    <span class="mark-sub">how it works · tabs 01–04: a teaching model that learned from <b id="livesCount">102 million</b> simulated lives · 05–08: the planning engine</span>
-  </div>
-  <nav class="modes" id="modes">
-    <button data-mode="think" class="on"><span>01</span>Think</button>
-    <button data-mode="birth"><span>02</span>Birth</button>
-    <button data-mode="surgery"><span>03</span>Surgery</button>
-    <button data-mode="book"><span>04</span>Book</button>
-    <button data-mode="tax"><span>05</span>Tax Code</button>
-    <button data-mode="mg"><span>06</span>Engine</button>
-    <button data-mode="lab"><span>07</span>Roth Lab</button>
-    <button data-mode="finder"><span>08</span>Finder</button>
+  <nav class="modes" id="modes" aria-label="Experiments">
+    <button data-mode="think" class="on">Watch it think</button>
+    <button data-mode="birth">Watch it learn</button>
+    <button data-mode="surgery">Operate on it</button>
+    <button data-mode="book">A whole book</button>
+    <button data-mode="tax">It learned taxes</button>
+    <button data-mode="mg">It learned the engine</button>
+    <button data-mode="lab">Roth lab</button>
+    <button data-mode="finder">Money finder</button>
   </nav>
-  <a class="tour-btn" href="./" style="text-decoration:none">← Back to the X-ray</a>
-  <button class="tour-btn" id="tourBtn">▶ Tour</button>
+  <button class="tour-btn" id="tourBtn">Play the tour</button>
   <button class="about-btn" id="aboutBtn" aria-label="What is this?">?</button>
 </header>
+<p class="lab-cap" id="modeCap">A small brain that learned to judge retirement plans. Each dot is a neuron: move a slider on the left and watch which ones light up, and what it decides on the right.</p>
+<span id="livesCount" hidden>102 million</span>
+</div>
 
 <main class="stage">
   <aside class="panel left" id="clientPanel">
@@ -136,16 +145,16 @@
   <div class="about-card">
     <button class="about-x" id="aboutX" aria-label="Close">×</button>
     <h1>What you're looking at</h1>
-    <p class="lede">Neural networks for financial planning, with the glass taken off. You can watch them think, read what they learned, operate on them, audit them, and even write one by hand from the tax code.</p>
+    <p class="lede">The front pages use a small "brain" (a neural network) so they can re-check thousands of families in a blink. This page lets you look inside it, the way you'd take the back off a watch.</p>
     <div class="about-grid">
-      <div><h3>1 · The world</h3><p>A Monte Carlo engine invented 400,000 retirees and lived out each one 256 different ways: random markets, random lifespans, spending cuts in bad years. That's 102 million lives.</p></div>
-      <div><h3>2 · The brain</h3><p>The network saw each retiree's eight facts and the fraction of their lives where the money lasted. Through gradient descent it found its own way to compute withdrawal rate, longevity and crash risk. Nobody wrote those in.</p></div>
-      <div><h3>3 · The glass</h3><p>Every neuron here is real and every connection is a trained weight. Click a neuron to see what it learned to care about. Turn it down and watch the brain's judgement change. That's weight-space surgery.</p></div>
-      <div><h3>4 · The tax code</h3><p>A second brain learned 2026 federal tax law from 3 million returns computed by the planning engine, and its neurons bend at the real bracket edges. A third network was written by hand from the statute: 40 neurons, exact to the penny. A law change becomes a weight change.</p></div>
-      <div><h3>5 · The engine</h3><p>A fourth brain learned the whole planning engine (taxes, RMDs, IRMAA, Social Security) from 60,000 real plans. It answers in microseconds and is checked live against the engine itself.</p></div>
-      <div><h3>6 · Why it matters</h3><p>The brain answers in microseconds. Running a Monte Carlo takes far longer. That's fast enough to X-ray an advisor's whole book on every market tick, and you can see why it said what it said.</p></div>
+      <div><h3>It practiced</h3><p>It studied 102 million made up retirements, good markets and bad, long lives and short, and learned which plans tend to last.</p></div>
+      <div><h3>You can watch it think</h3><p>Each dot is a neuron. Change a family's numbers and see which ones light up, and what each one cares about.</p></div>
+      <div><h3>You can test it</h3><p>Switch neurons off and see whether it still gets the right answer. That's how you know it learned real ideas, not tricks.</p></div>
+      <div><h3>It learned the tax code</h3><p>A second brain learned 2026 tax law from 3 million returns. Its bends line up with the real brackets, within a few dollars.</p></div>
+      <div><h3>It's always checked</h3><p>Every answer can be compared live with the full planning engine, so you can see exactly how close it is.</p></div>
+      <div><h3>Why bother?</h3><p>Speed. The engine takes a moment per family. The brain takes microseconds, fast enough to watch a whole firm on every market move.</p></div>
     </div>
-    <div class="about-cta"><button class="cta" id="aboutTour">▶ Watch the 60-second tour</button><button class="cta ghost" id="aboutExplore">Explore on my own</button></div>
+    <div class="about-cta"><button class="cta" id="aboutTour">Watch the 60 second tour</button><button class="cta ghost" id="aboutExplore">Explore on my own</button></div>
     <p class="fine">Educational model. Real returns are drawn from a simple fat-ish normal market model (stocks 6.5% ± 17%, bonds 1.8% ± 6.5%, after inflation) and Gompertz mortality. It is not financial advice and not any firm's planning engine.</p>
   </div>
 </div>

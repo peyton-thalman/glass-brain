@@ -102,17 +102,17 @@ function stats() {
   const below = S.below.reduce((t, v) => t + v, 0), fresh = S.fresh.reduce((t, v) => t + v, 0), money = S.money.reduce((t, v) => t + v, 0);
   const needHelp = S.fresh.filter((v) => v >= 25).length;
   $('#stats').innerHTML = `
-    <div class="bk-stat ${fresh ? 'alarm' : ''}"><span class="l">Plans below 75%</span><b>${below.toLocaleString()}</b><div class="d">${fresh ? `${fresh.toLocaleString()} fell below since the plans were made` : `of ${HOUSEHOLDS.toLocaleString()} households`}</div></div>
-    <div class="bk-stat ${fresh ? 'alarm' : ''}"><span class="l">Client money in those plans</span><b>${compact(money)}</b><div class="d">of ${compact(S.aum)} across the firm</div></div>
-    <div class="bk-stat ${needHelp ? 'alarm' : ''}"><span class="l">Advisors with 25+ new red flags</span><b>${needHelp}</b><div class="d">who need help this week, of ${ADVISORS}</div></div>
-    <div class="bk-stat"><span class="l">Re-scored this frame</span><b>${(S.ms / 1000).toFixed(1)}s</b><div class="d">${HOUSEHOLDS.toLocaleString()} households, in this browser</div></div>`;
+    <div class="bk-stat ${fresh ? 'alarm' : ''}"><span class="l">Families who need a call</span><b>${below.toLocaleString()}</b><div class="d">${fresh ? `${fresh.toLocaleString()} fell below since the plans were made` : `of ${HOUSEHOLDS.toLocaleString()} households`}</div></div>
+    <div class="bk-stat ${fresh ? 'alarm' : ''}"><span class="l">Savings in those plans</span><b>${compact(money)}</b><div class="d">of ${compact(S.aum)} across the firm</div></div>
+    <div class="bk-stat ${needHelp ? 'alarm' : ''}"><span class="l">Advisors who need help</span><b>${needHelp}</b><div class="d">25 or more new calls this week, of ${ADVISORS}</div></div>
+    <div class="bk-stat"><span class="l">Time to re-check everyone</span><b>${(S.ms / 1000).toFixed(1)}s</b><div class="d">${HOUSEHOLDS.toLocaleString()} households, in this browser</div></div>`;
   const engineHours = (HOUSEHOLDS * 0.09) / 3600;
   $('#speed').innerHTML = `The planning engine itself takes about 90 ms per household at 1,000 markets, so one re-score of this firm would take it about <b>${engineHours.toFixed(1)} CPU-hours</b>. The neural network did it in <b>${(S.ms / 1000).toFixed(1)} seconds</b> on this computer. Generating the 100,000 households took ${(S.genMs / 1000).toFixed(1)} s.`;
 }
 
 function color(share) {
   const t = Math.min(1, share / 0.45);
-  const a = [159, 230, 184], m = [255, 176, 74], b = [255, 106, 85];
+  const a = [76, 195, 138], m = [240, 180, 76], b = [242, 101, 90];
   const mix = (p, q, u) => p.map((v, j) => Math.round(v + (q[j] - v) * u));
   return `rgb(${(t < 0.5 ? mix(a, m, t * 2) : mix(m, b, (t - 0.5) * 2)).join(',')})`;
 }

@@ -1,0 +1,113 @@
+/* Try it: one question per screen, then the answer in plain words. */
+
+.t-main { max-width: 760px; margin: 0 auto; padding: 0 16px; min-height: 70vh; }
+.t-progress { position: sticky; top: 0; height: 2px; margin: 0 -16px; background: transparent; z-index: 40; }
+.t-progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.8s var(--ease); }
+
+.t-flow { padding-top: 64px; }
+.t-card.fwd, .t-card.first { animation: tin 0.7s var(--ease) both; }
+.t-card.back { animation: tback 0.7s var(--ease) both; }
+@keyframes tin { from { opacity: 0; transform: translateX(32px); filter: blur(8px); } }
+@keyframes tback { from { opacity: 0; transform: translateX(-32px); filter: blur(8px); } }
+@media (prefers-reduced-motion: reduce) { .t-card { animation: none; } }
+
+.t-step { margin: 0 0 12px; color: var(--accent); font: 500 14px/20px var(--sans); }
+.t-title { font-size: 48px; }
+.t-sub { margin: 16px 0 0; color: var(--muted); font: 400 18px/28px var(--sans); max-width: 600px; text-wrap: pretty; }
+.t-sub b { color: var(--text); font-weight: 600; }
+.t-body { display: grid; gap: 24px; margin-top: 40px; }
+.t-err { min-height: 24px; margin: 16px 0 0; color: var(--coral); }
+.t-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.t-nav.center { justify-content: center; flex-wrap: wrap; }
+@media (max-width: 560px) { .t-flow { padding-top: 40px; } .t-title { font-size: 30px; line-height: 36px; } .t-sub { font-size: 16px; line-height: 24px; } }
+
+.t-people { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.t-people.one { grid-template-columns: 1fr; }
+.t-person { display: grid; gap: 16px; align-content: start; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+.t-who { font: 600 18px/28px var(--sans); }
+.t-row { display: grid; grid-template-columns: 96px 1fr; gap: 12px; }
+@media (max-width: 640px) { .t-people { grid-template-columns: 1fr; } .t-person { padding: 16px; } }
+.t-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 560px) { .t-grid { grid-template-columns: 1fr; } }
+
+.t-field { display: grid; gap: 8px; align-content: start; }
+.t-field > span { color: var(--muted); font: 500 14px/20px var(--sans); text-wrap: pretty; }
+.t-field small { color: var(--faint); font: 400 12px/16px var(--sans); }
+.t-field input, .t-field select, .t-money {
+  width: 100%; height: 48px; padding: 0 16px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--raise);
+  color: var(--text); font: 500 18px/28px var(--sans); transition: border-color 0.4s var(--ease), background 0.4s var(--ease);
+}
+.t-field input::placeholder { color: var(--faint); }
+.t-field input:focus, .t-field select:focus, .t-money:focus-within { outline: none; border-color: var(--accent); background: #161616; }
+.t-field.sm { max-width: 200px; }
+.t-money { display: flex; align-items: center; gap: 4px; }
+.t-money i { color: var(--muted); font-style: normal; }
+.t-money input { border: 0; background: none; padding: 0; height: auto; font-variant-numeric: tabular-nums; }
+.t-money input:focus { background: none; }
+.t-money em { color: var(--faint); font: 400 14px/20px var(--sans); font-style: normal; white-space: nowrap; }
+
+.t-seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.t-seg button {
+  padding: 8px 16px; min-height: 40px; border: 1px solid var(--line-2); border-radius: 9999px; color: var(--muted); font: 500 14px/20px var(--sans);
+  transition: color 0.4s var(--ease), background 0.4s var(--ease), border-color 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.t-seg button:hover { color: var(--text); }
+.t-seg button:active { transform: scale(0.98); }
+.t-seg button[aria-checked='true'] { background: var(--text); color: #000; border-color: transparent; }
+.t-seg.lg button { padding: 12px 24px; font-size: 16px; line-height: 24px; }
+
+/* ---------------------------------------------------------------- waiting */
+.t-wait { text-align: center; padding: 120px 0 80px; }
+.t-wait .gb-h { font-size: 36px; line-height: 40px; }
+.t-wait p { color: var(--muted); max-width: 480px; margin: 16px auto 0; }
+.t-spin { display: grid; grid-template-columns: repeat(6, 12px); gap: 8px; justify-content: center; margin-bottom: 32px; }
+.t-spin i { width: 12px; height: 12px; border-radius: 9999px; background: var(--good); animation: tp 1.2s var(--ease) infinite; }
+.t-spin i:nth-child(3n) { animation-delay: 0.2s; } .t-spin i:nth-child(4n) { animation-delay: 0.4s; background: var(--coral); } .t-spin i:nth-child(5n) { animation-delay: 0.6s; }
+@keyframes tp { 50% { opacity: 0.25; transform: scale(0.7); } }
+
+/* ---------------------------------------------------------------- the answer */
+.t-result { padding-top: 64px; }
+.t-r1 { text-align: center; }
+.t-head { font-size: 48px; }
+.t-head .good { color: var(--good); } .t-head .amber { color: var(--amber); } .t-head .coral { color: var(--coral); }
+.t-head span { -webkit-text-fill-color: currentColor; }
+.t-r1 .t-sub { margin-left: auto; margin-right: auto; }
+.t-dots { margin: 40px auto 0; max-width: 320px; }
+.t-dots i { transform: scale(0); }
+.t-dots.go i { transform: none; transition-delay: calc(var(--d, 0) * 1ms); }
+.t-dots.go i.bad { transform: scale(0.8); }
+.t-legend { display: flex; gap: 8px; justify-content: center; align-items: center; color: var(--muted); font-size: 14px; line-height: 20px; margin: 24px 0 0; }
+.t-legend i { width: 10px; height: 10px; border-radius: 9999px; display: inline-block; }
+.t-legend i.ok { background: var(--good); } .t-legend i.bad { background: var(--coral); margin-left: 8px; }
+@media (max-width: 560px) { .t-result { padding-top: 40px; } .t-head { font-size: 30px; line-height: 36px; } .t-head br { display: none; } }
+
+.t-sec { padding-top: 96px; }
+.t-sec .gb-h { font-size: 36px; line-height: 40px; }
+@media (max-width: 560px) { .t-sec { padding-top: 64px; } .t-sec .gb-h { font-size: 30px; line-height: 36px; } }
+
+.t-bars { display: grid; gap: 8px; margin-top: 32px; }
+.t-bar { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 40px; gap: 16px; align-items: center; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+.t-bar.base { background: var(--raise); }
+.t-bl b { display: block; font-weight: 600; }
+.t-bl span { display: block; color: var(--muted); font-size: 14px; line-height: 20px; text-wrap: pretty; }
+.t-track { height: 8px; border-radius: 9999px; background: #1d1d1d; overflow: hidden; }
+.t-track i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--c); transition: width 1.4s var(--ease); }
+.t-bars.go .t-track i { width: var(--w); }
+.t-bars.go .t-bar:nth-child(2) i { transition-delay: 0.08s; } .t-bars.go .t-bar:nth-child(3) i { transition-delay: 0.16s; } .t-bars.go .t-bar:nth-child(4) i { transition-delay: 0.24s; } .t-bars.go .t-bar:nth-child(5) i { transition-delay: 0.32s; } .t-bars.go .t-bar:nth-child(n+6) i { transition-delay: 0.4s; }
+.t-bv { font: 600 20px/28px var(--sans); text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) { .t-bar { grid-template-columns: 1fr 40px; gap: 8px 16px; } .t-track { grid-column: 1 / -1; grid-row: 2; } }
+.t-call { margin: 24px 0 0; padding: 16px 24px; border-radius: 12px; background: var(--coral-soft); color: var(--text); font-size: 16px; line-height: 24px; }
+.t-call b { font-weight: 600; }
+
+.t-years { display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); gap: 4px; margin-top: 32px; }
+.t-years i { aspect-ratio: 1; border-radius: 3px; background: var(--good); opacity: 0; transform: translateY(8px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+.t-years i.bad { background: var(--coral); }
+.t-years.go i { opacity: 1; transform: none; }
+.t-yaxis { display: flex; justify-content: space-between; color: var(--faint); font-size: 12px; line-height: 16px; margin-top: 8px; }
+.t-note { margin: 24px 0 0; color: var(--muted); text-wrap: pretty; }
+
+.t-fixbox { margin-top: 32px; }
+.t-next { text-align: center; padding-bottom: 32px; }
+.t-next .t-sub { margin-left: auto; margin-right: auto; }
+.t-next .t-nav { margin-top: 32px; }
+.t-private { color: var(--faint); font-size: 14px; line-height: 20px; margin-top: 24px; }

@@ -269,17 +269,17 @@ function renderStats() {
   }
   const d = below - below0;
   $('#stats').innerHTML = `
-    <div class="bk-stat ${d > 0 ? 'alarm' : ''}"><span class="l">Plans below 75%</span><b>${below.toLocaleString()}</b><div class="d">${d > 0 ? `+${d.toLocaleString()} since the plans were made` : d < 0 ? `−${Math.abs(d).toLocaleString()} since the plans were made` : 'same as the day the plans were made'}</div></div>
-    <div class="bk-stat ${d > 0 ? 'alarm' : ''}"><span class="l">Money in those plans</span><b>${compact(money)}</b><div class="d">across ${below.toLocaleString()} households</div></div>
-    <div class="bk-stat ${roth ? 'good' : ''}"><span class="l">Roth conversion windows open</span><b>${roth.toLocaleString()}</b><div class="d">${roth ? `${compact(rothAmt)} could convert at today's prices` : 'they open when stocks are down 10%+'}</div></div>
-    <div class="bk-stat"><span class="l">Guardrail check-ins due</span><b>${guard.toLocaleString()}</b><div class="d">withdrawal rate up 20% or more</div></div>`;
+    <div class="bk-stat ${d > 0 ? 'alarm' : ''}"><span class="l">Families who need a call</span><b>${below.toLocaleString()}</b><div class="d">${d > 0 ? `+${d.toLocaleString()} since the plans were made` : d < 0 ? `−${Math.abs(d).toLocaleString()} since the plans were made` : 'same as the day the plans were made'}</div></div>
+    <div class="bk-stat ${d > 0 ? 'alarm' : ''}"><span class="l">Savings in those plans</span><b>${compact(money)}</b><div class="d">across ${below.toLocaleString()} households</div></div>
+    <div class="bk-stat ${roth ? 'good' : ''}"><span class="l">Tax saving chances</span><b>${roth.toLocaleString()}</b><div class="d">${roth ? `${compact(rothAmt)} could move to a Roth while prices are low` : 'they open when stocks fall 10% or more'}</div></div>
+    <div class="bk-stat"><span class="l">Spending check-ins due</span><b>${guard.toLocaleString()}</b><div class="d">taking out 20% more than planned</div></div>`;
 }
 
 // ---------------------------------------------------------------- the field
 
 const COLS = 100;
 function colorOf(p) {
-  const stops = [[0, [255, 106, 85]], [50, [255, 140, 74]], [75, [255, 176, 74]], [88, [196, 214, 140]], [97, [159, 230, 184]]];
+  const stops = [[0, [242, 101, 90]], [70, [242, 101, 90]], [76, [240, 180, 76]], [86, [240, 180, 76]], [94, [76, 195, 138]]];
   let a = stops[0], b = stops[stops.length - 1];
   for (let s = 0; s < stops.length - 1; s++) if (p >= stops[s][0] && p <= stops[s + 1][0]) { a = stops[s]; b = stops[s + 1]; }
   const t = b[0] === a[0] ? 0 : Math.min(1, Math.max(0, (p - a[0]) / (b[0] - a[0])));
@@ -448,7 +448,7 @@ function renderDetail() {
         ${roth ? `<p class="fx-cost">Roth window: converting <b>${compact(roth.roth)}</b> this year fills the ${Math.round(roth.rate * 100)}% bracket and stays under the first IRMAA tier (from the engine's ledger). At today's prices that buys ${(1 / roth.k).toFixed(2)}× the shares it would have on the plan date.</p>` : ''}
         <div class="bk-actions">
           <button class="btn" id="checkBtn">${eng ? 'Checked against the engine ✓' : 'Check all of these with the engine'}</button>
-          <a class="btn primary" href="./#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the full X-ray →</a>
+          <a class="btn primary" href="household.html#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the full X-ray →</a>
         </div>
       </div>
       <div>
@@ -572,7 +572,7 @@ function mondayBrief() {
     const why = r.tier === 0 ? `Plan fell from ${Math.round(p0Of(r.i))}% to ${p}% since it was made.` : `Plan looks fine at ${p}%, but ${w ? headName(f, w.worst.h).replace(/^./, (c) => c.toLowerCase()) : 'one event'} would take it to ${w ? Math.round(r.c && r.c.v != null ? r.c.v : w.worst.v) : '?'}%.`;
     return `<div class="mb-item"><div class="mb-n">${n}</div><div><div class="mb-name">${esc(f.name)}${r.c ? ' <span class="mb-ok">✓ engine-checked</span>' : ''}</div>
       <div class="mb-why">${esc(why)} ${esc(summary(f))}</div><div class="mb-say">${esc(opener(f, r))}</div>
-      <a class="mb-link" href="./#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the X-ray to bring to the call →</a></div></div>`;
+      <a class="mb-link" href="household.html#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the X-ray to bring to the call →</a></div></div>`;
   };
   const opp = (o, n) => {
     const f = S.book[o.i];
@@ -626,7 +626,7 @@ function say(k, n, html) {
 }
 function spot(sel) {
   document.querySelectorAll('.spot').forEach((x) => x.classList.remove('spot'));
-  const el = $(sel); el.classList.add('spot'); el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const el = $(sel); el.closest('details')?.setAttribute('open', ''); el.classList.add('spot'); el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 function endStory() { story.run++; S.playing = false; $('#story').hidden = true; document.querySelectorAll('.spot').forEach((x) => x.classList.remove('spot')); }
 $('#storyNext').addEventListener('click', () => (story.skip = true));

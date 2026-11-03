@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Try Glass Brain</title>
+<meta name="description" content="Five short questions about a real family, and the planning engine shows what could break the plan and the gentlest fix. Nothing leaves your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23000'/%3E%3Ccircle cx='7.5' cy='14' r='2.2' fill='%238d90ff'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%23fff'/%3E%3Ccircle cx='16.5' cy='14' r='2.2' fill='%234cc38a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="home.css">
+<link rel="stylesheet" href="try.css">
+</head>
+<body>
+<nav class="gb-nav" aria-label="Main">
+  <a class="gb-logo" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M7.5 14 12 8l4.5 6" stroke="currentColor" stroke-opacity=".5" fill="none"/><circle cx="7.5" cy="14" r="2" fill="#8d90ff"/><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="#4cc38a"/></svg><span>Glass Brain</span></a>
+  <a class="gb-link" href="household.html">Family</a>
+  <a class="gb-link" href="book.html">Advisor</a>
+  <a class="gb-link" href="firm.html">Firm</a>
+  <a class="gb-link opt" href="lab.html">How it works</a>
+  <a class="gb-cta" href="try.html" aria-current="page">Try it</a>
+</nav>
+
+<main id="main" class="t-main">
+  <div class="t-progress" id="prog" aria-hidden="true"><i></i></div>
+  <form id="flow" class="t-flow" novalidate autocomplete="off"></form>
+  <section id="result" class="t-result" hidden></section>
+</main>
+
+<footer class="gb-foot">
+  <span>Everything runs inside this browser tab. Nothing you type is sent anywhere or saved. Education and decision support, not personal advice.</span>
+  <nav><a href="./">Home</a><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a></nav>
+</footer>
+
+<script type="module" src="js/try.js"></script>
+</body>
+</html>

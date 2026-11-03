@@ -1,0 +1,51 @@
+/* The live tool pages (family, advisor, firm) in the calmer system: centered, more air, sans numbers,
+   and nothing in monospace unless it's a table of figures. Loaded after household.css and ui.css. */
+
+body { font: 400 14px/20px var(--sans); }
+.hx-families, .hx-main, .bk-hero, .bk-main, .bk-detail, .bk-morewrap, .fm-card, .bk-foot { max-width: 1280px; margin-left: auto !important; margin-right: auto !important; }
+.hx-families, .hx-main, .bk-hero, .bk-main { padding-left: 24px !important; padding-right: 24px !important; }
+.bk-detail, .fm-card, .bk-morewrap { margin-top: 16px; width: calc(100% - 48px); }
+.bk-foot { padding: 24px; }
+@media (max-width: 700px) {
+  .hx-families, .hx-main, .bk-hero, .bk-main { padding-left: 16px !important; padding-right: 16px !important; }
+  .bk-detail, .fm-card, .bk-morewrap { width: calc(100% - 32px); }
+}
+
+/* every big number in one voice */
+.v-num, .bk-big, .bk-stat b, .cl-big, .meet .big, [class*='-big'] {
+  font-family: var(--sans) !important; font-weight: 600 !important; letter-spacing: -0.03em !important; font-style: normal !important;
+}
+.hx-word { display: none; }
+[style*='--mono'], .hx-fam .s, .ev-p, .tor-t .v { font-family: var(--sans); }
+.hx-kicker, .in-sec summary .sum { font-family: var(--sans) !important; letter-spacing: 0 !important; }
+
+/* family picker: four quiet cards */
+.hx-families { gap: 12px !important; padding-top: 0 !important; }
+.hx-fam { border-radius: 16px !important; padding: 16px !important; background: var(--card) !important; }
+.hx-fam.on, .hx-fam[aria-pressed='true'] { border-color: var(--accent) !important; background: var(--accent-soft) !important; }
+
+/* intake: lighter section headers */
+.hx-intake { border-radius: 16px; }
+.in-sec summary { font: 500 14px/20px var(--sans) !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* market controls */
+.bk-play { border-color: var(--text) !important; color: var(--text) !important; }
+.bk-play:hover { background: rgba(255, 255, 255, 0.08) !important; }
+.bk-slider input { accent-color: var(--accent) !important; }
+.bk-stat { border-radius: 16px !important; }
+.bk-stat .d { font-family: var(--sans) !important; }
+
+/* the advisor's flags list */
+.bk-flags { border-radius: 16px; }
+
+/* the firm grid */
+.fm-grid { gap: 16px; }
+
+/* spotlight used by the story */
+.spot { box-shadow: 0 0 0 1px var(--accent), 0 0 0 6px var(--accent-soft) !important; }
+.story, .tour { border-radius: 16px !important; font-family: var(--sans) !important; }
+
+/* on narrower screens the answer comes first and the form that changes it second */
+@media (max-width: 1100px) { .hx-xray { order: -1; } }
+.ask-h span, .ask-ok, .ask-m { font-family: var(--sans) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.hx-intake, .bk-flags { top: 80px !important; max-height: calc(100vh - 96px) !important; }

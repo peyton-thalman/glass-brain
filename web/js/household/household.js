@@ -190,7 +190,7 @@ function renderAsk() {
   el.innerHTML = `
     <div class="ask-h"><span>Ask these first</span><span class="ask-m">${pct}% of what matters confirmed</span></div>
     <div class="ask-bar"><i style="width:${pct}%"></i></div>
-    ${open.slice(0, 4).map((q) => `<div class="ask-q">
+    ${open.slice(0, 2).map((q) => `<div class="ask-q">
       <div class="ask-t">${esc(q.q)}</div>
       <div class="ask-s">The answer moves the plan between <b>${q.lo}%</b> and <b>${q.hi}%</b>. ${esc(q.why)}</div>
       <button class="ask-ok" data-confirm="${q.id}">Confirmed ✓</button>
@@ -875,6 +875,12 @@ async function startStory() {
 async function boot() {
   ['#verdict', '#breaks', '#fix', '#sens', '#insights'].forEach((s) => ($(s).innerHTML = '<p class="loading">running the engine…</p>'));
   const id = location.hash.slice(1);
+  if (id === 'mine') {
+    // Answers from the Try it page, handed over in this tab's sessionStorage (they never leave the browser).
+    let mine = null;
+    try { mine = JSON.parse(sessionStorage.getItem('gb-try') || 'null'); } catch {}
+    if (mine) return load(null, mine, 'mine', 'Your family, from Try it');
+  }
   const m = id.match(/^book:(h\d+|[a-z]+):(-?[\d.]+)(?::(-?[\d.]+))?$/);
   if (m) {
     const book = await fetch('data/book.json').then((r) => r.json());

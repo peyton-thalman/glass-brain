@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family X-ray · Glass Brain</title>
+<meta name="description" content="See inside a retirement plan: what breaks it, why, and the gentlest fix. Built on the planning engine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23000'/%3E%3Ccircle cx='7.5' cy='14' r='2.2' fill='%238d90ff'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%23fff'/%3E%3Ccircle cx='16.5' cy='14' r='2.2' fill='%234cc38a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="household.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body>
+<nav class="gb-nav" aria-label="Main">
+  <a class="gb-logo" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M7.5 14 12 8l4.5 6" stroke="currentColor" stroke-opacity=".5" fill="none"/><circle cx="7.5" cy="14" r="2" fill="#8d90ff"/><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="#4cc38a"/></svg><span>Glass Brain</span></a>
+  <a class="gb-link" href="household.html" aria-current="page">Family</a>
+  <a class="gb-link" href="book.html">Advisor</a>
+  <a class="gb-link" href="firm.html">Firm</a>
+  <a class="gb-link opt" href="lab.html">How it works</a>
+  <a class="gb-cta" href="try.html">Try it</a>
+</nav>
+
+<header class="gb-intro">
+  <p class="gb-eyebrow">For a family</p>
+  <h1>One family's retirement, X&#8209;rayed.</h1>
+  <p>Pick a family, or change anything about them on the left. Glass Brain shows the chance their money lasts, what would break it, and the gentlest fix.</p>
+  <div class="gb-actions">
+    <button class="gb-btn" id="storyBtn">Play the 60 second story</button>
+    <button class="gb-btn ghost" id="meetBtn">Meeting mode</button>
+    <a class="gb-btn ghost" href="try.html">Try your own family</a>
+  </div>
+</header>
+<section class="hx-families" id="families" aria-label="Sample households"></section>
+
+<main class="hx-main">
+  <aside class="hx-intake" id="intake" aria-label="The household"></aside>
+  <div class="hx-xray" id="xray">
+    <section class="hx-card hx-verdict" id="verdict"></section>
+    <section class="hx-card" id="breaks"></section>
+    <section class="hx-card" id="events"></section>
+    <section class="hx-card" id="cliff" hidden></section>
+    <section class="hx-card" id="fix"></section>
+    <details class="gb-more" id="more">
+      <summary>Show the details: year by year money, taxes, and what moves the plan</summary>
+      <div class="gb-more-body">
+        <section class="hx-card" id="math"></section>
+        <section class="hx-card" id="sens"></section>
+        <section class="hx-card" id="insights"></section>
+      </div>
+    </details>
+    <footer class="hx-fine">
+      Every number on this page comes from the planning engine under 2026 federal law: 1,000 simulated markets, every real
+      retirement start year since 1928 (Damodaran returns, CPI-U inflation), SSA mortality, RMDs, IRMAA and survivor rules, with Arizona's
+      2.5% flat tax. The households are made up. This is education and decision support, not personal advice.
+    </footer>
+  </div>
+</main>
+
+<footer class="gb-foot">
+  <span>Glass Brain · built by Peyton Thalman · education and decision support, not personal advice</span>
+  <nav><a href="./">Home</a><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a><a href="lab.html">How it works</a></nav>
+</footer>
+
+<section class="meet" id="meeting" hidden></section>
+<section class="brief" id="brief" hidden></section>
+<div class="story" id="story" hidden><div class="story-bar"><i id="storyProg"></i></div><div class="story-text" id="storyText"></div><div class="story-foot"><span id="storyStep"></span><span><button id="storyNext">Next →</button><button id="storyEnd">End</button></span></div></div>
+<div class="hx-tip" id="tip" hidden></div>
+<script type="module" src="js/household/household.js"></script>
+</body>
+</html>

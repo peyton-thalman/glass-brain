@@ -785,8 +785,22 @@ async function openMG() {
 function buildModes() {
   document.querySelectorAll('#modes button').forEach((b) => { b.onclick = () => setMode(b.dataset.mode); });
 }
+// One plain sentence per experiment, shown under the tabs.
+function modeCaption(m) {
+  return {
+  think: 'A small brain that learned to judge retirement plans. Each dot is a neuron: move a slider on the left and watch which ones light up, and what it decides on the right.',
+  birth: 'Press play and watch the brain go from random guesses to expert answers as it studies 102 million practice retirements.',
+  surgery: 'Switch neurons off and see if it still gets the answer right. That is how we know it learned real ideas, not tricks.',
+  book: 'The same brain judging 4,000 families at once, in a blink. Drag the market and watch every one of them move.',
+  tax: 'A second brain learned 2026 tax law from 3 million returns. Its bends land on the real tax brackets, within a few dollars.',
+  mg: 'A third brain learned the whole planning engine: taxes, Social Security, Medicare. It is checked live against the real thing.',
+  lab: 'Try Roth conversions on a family and see what they save in taxes, year by year.',
+  finder: 'The brain scans a whole book of clients for money left on the table, in about ten seconds.',
+  }[m] || '';
+}
 function setMode(m) {
   state.mode = m;
+  if ($('#modeCap')) $('#modeCap').textContent = modeCaption(m);
   document.body.dataset.mode = m;
   document.querySelectorAll('#modes button').forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
   if (m === 'birth') {

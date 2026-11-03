@@ -2,8 +2,5 @@
   "buildCommand": "",
   "outputDirectory": "web",
   "framework": null,
-  "redirects": [
-    { "source": "/household.html", "destination": "/", "permanent": true },
-    { "source": "/household", "destination": "/", "permanent": true }
-  ]
+  "cleanUrls": false
 }

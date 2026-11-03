@@ -3,47 +3,188 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Household X-ray</title>
-<meta name="description" content="See inside a retirement plan: what breaks it, why, and the gentlest fix. Built on the planning engine.">
+<title>Glass Brain</title>
+<meta name="description" content="See what could break a retirement before it does. One family, an advisor's whole book, or an entire firm, re-checked every time the market moves.">
+<meta property="og:title" content="Glass Brain">
+<meta property="og:description" content="See what could break a retirement before it does.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23000'/%3E%3Ccircle cx='7.5' cy='14' r='2.2' fill='%238d90ff'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%23fff'/%3E%3Ccircle cx='16.5' cy='14' r='2.2' fill='%234cc38a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="household.css">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="home.css">
 </head>
 <body>
-<header class="hx-top">
-  <a class="hx-brand" href="./"><span class="hx-word">Glass Brain</span><span class="hx-sep">/</span><span class="hx-page">Household X-ray</span></a>
-  <nav class="hx-nav"><a href="./" class="on">One household</a><a href="book.html">Whole book</a><a href="firm.html">Whole firm</a><a href="lab.html">How it works</a></nav>
-  <button class="btn hx-story-btn" id="meetBtn">Meeting mode</button>
-  <button class="btn primary hx-story-btn" id="storyBtn">▶ Story</button>
-  <span class="hx-by">Built by Peyton Thalman</span>
-</header>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="gb-nav" aria-label="Main">
+  <a class="gb-logo" href="./" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M7.5 14 12 8l4.5 6" stroke="currentColor" stroke-opacity=".5" fill="none"/><circle cx="7.5" cy="14" r="2" fill="#8d90ff"/><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="#4cc38a"/></svg><span>Glass Brain</span></a>
+  <a class="gb-link" href="household.html">Family</a>
+  <a class="gb-link" href="book.html">Advisor</a>
+  <a class="gb-link" href="firm.html">Firm</a>
+  <a class="gb-link opt" href="lab.html">How it works</a>
+  <a class="gb-cta" href="try.html">Try it</a>
+</nav>
 
-<section class="hx-families" id="families" aria-label="Sample households"></section>
+<main id="main">
 
-<main class="hx-main">
-  <aside class="hx-intake" id="intake" aria-label="The household"></aside>
-  <div class="hx-xray" id="xray">
-    <section class="hx-card hx-verdict" id="verdict"></section>
-    <section class="hx-card" id="breaks"></section>
-    <section class="hx-card" id="events"></section>
-    <section class="hx-card" id="cliff" hidden></section>
-    <section class="hx-card" id="fix"></section>
-    <section class="hx-card" id="math"></section>
-    <section class="hx-card" id="sens"></section>
-    <section class="hx-card" id="insights"></section>
-    <footer class="hx-fine">
-      Every number on this page comes from the planning engine under 2026 federal law: 1,000 simulated markets, every real
-      retirement start year since 1928 (Damodaran returns, CPI-U inflation), SSA mortality, RMDs, IRMAA and survivor rules, with Arizona's
-      2.5% flat tax. The households are made up. This is education and decision support, not personal advice.
-    </footer>
+<!-- ============================================================ hero -->
+<section class="h-hero">
+  <p class="gb-eyebrow rv">Retirement plans you can see inside</p>
+  <h1 class="gb-h h-title rv">See what could break <br>a retirement <span class="nb">before it does.</span></h1>
+  <p class="h-sub rv">Glass Brain lives out a family's plan through every real market since 1928, finds the one thing that would sink it, and shows the gentlest fix. For one family, an advisor's whole book, or an entire firm.</p>
+  <div class="h-actions rv">
+    <a class="gb-btn lg" href="try.html">Try it on your family</a>
+    <a class="gb-btn lg ghost" href="#story">See how it works</a>
   </div>
+  <p class="h-proof rv">Built on a planning engine checked against IRS, Social Security and Medicare rules. Nothing you type leaves your browser.</p>
+
+  <figure class="h-visual rv" aria-label="Every real retirement start year since 1928, replayed for one couple">
+    <div class="h-vhead">
+      <div><b>Dale &amp; Marilyn</b><span>retiring in every year since 1928</span></div>
+      <div class="h-legend"><i class="ok"></i>money lasted <i class="bad"></i>ran out</div>
+    </div>
+    <canvas id="heroPaths"></canvas>
+    <figcaption id="heroCap"><span class="sk w60"></span></figcaption>
+  </figure>
+</section>
+
+<!-- ============================================================ one number hides the story -->
+<section class="h-sec" id="story">
+  <div class="h-head rv">
+    <p class="gb-eyebrow">For a family</p>
+    <h2 class="gb-h">One number hides the story.</h2>
+    <p>Most plans end in a single score. The Kowalskis' is 89 out of 100, which sounds safe. Tap a "what if" and watch what it really depends on.</p>
+  </div>
+
+  <div class="h-what rv">
+    <div class="h-tabs" id="whatTabs" role="tablist"></div>
+    <div class="h-what-body">
+      <div class="h-dots" id="dots" aria-hidden="true"></div>
+      <div class="h-what-read">
+        <div class="h-big"><span id="whatP">··</span><small>out of 100</small></div>
+        <p class="h-big-cap">futures where their money lasts</p>
+        <p class="h-why" id="whatWhy"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ the gentlest fix -->
+<section class="h-sec">
+  <div class="h-head rv">
+    <p class="gb-eyebrow">And then, the fix</p>
+    <h2 class="gb-h">Not the biggest change. <br>The gentlest one.</h2>
+    <p>Gary and Linda Hoffman have no room for surprises. Glass Brain tries every change they said they could live with, and keeps the one that helps most for the least pain.</p>
+  </div>
+  <div class="h-fix rv" id="fix">
+    <div class="h-fix-side">
+      <span class="h-fix-tag">Today</span>
+      <div class="h-ring" id="ringA"></div>
+    </div>
+    <div class="h-fix-mid">
+      <div class="h-fix-arrow" aria-hidden="true"></div>
+      <div class="h-fix-moves" id="fixMoves"><span class="sk w80"></span><span class="sk w60"></span></div>
+    </div>
+    <div class="h-fix-side">
+      <span class="h-fix-tag good">With the fix</span>
+      <div class="h-ring" id="ringB"></div>
+    </div>
+  </div>
+  <div class="h-more rv"><a class="h-link" href="household.html#hoffman">Open the Hoffmans' full X-ray</a></div>
+</section>
+
+<!-- ============================================================ advisor -->
+<section class="h-sec">
+  <div class="h-head rv">
+    <p class="gb-eyebrow">For an advisor</p>
+    <h2 class="gb-h">4,000 clients, re-checked <br>every time the market moves.</h2>
+    <p>Each square is one household. This is the 2020 crash replaying day by day. When a plan slips into trouble, its square turns red, and the advisor knows who to call before the client does.</p>
+  </div>
+  <figure class="h-book rv">
+    <div class="h-book-top">
+      <div><div class="h-mkt" id="bkMove">0.0%</div><div class="h-mkt-sub" id="bkDate">S&amp;P 500</div></div>
+      <div class="h-count"><b id="bkBad">··</b><span>plans need a call</span></div>
+    </div>
+    <svg class="h-spark" id="bkSpark" viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <canvas id="bkField" aria-label="4,000 households as colored squares"></canvas>
+    <figcaption class="h-key"><i style="background:var(--good)"></i>on track <i style="background:var(--amber)"></i>worth a look <i style="background:var(--coral)"></i>needs a call</figcaption>
+  </figure>
+  <div class="h-more rv"><a class="h-link" href="book.html">Open the whole book</a></div>
+</section>
+
+<!-- ============================================================ firm -->
+<section class="h-sec">
+  <div class="h-head rv">
+    <p class="gb-eyebrow">For the firm</p>
+    <h2 class="gb-h">250 advisors. <br>100,000 families. One screen.</h2>
+    <p>Each tile is one advisor's whole book. Redder means more of their clients are in trouble. The home office sees where help is needed the same day the market turns.</p>
+  </div>
+  <figure class="h-firm rv">
+    <div class="h-book-top">
+      <div><div class="h-mkt" id="fmMove">0.0%</div><div class="h-mkt-sub" id="fmDate">getting the firm ready…</div></div>
+      <div class="h-count"><b id="fmBad">··</b><span>families below safe</span></div>
+    </div>
+    <div class="h-tiles" id="fmTiles"></div>
+  </figure>
+  <div class="h-speed rv">
+    <div><b id="spdEngine">··</b><span>for the planning engine to re-check every family once</span></div>
+    <div><b id="spdBrain" class="acc">··</b><span>for Glass Brain, on this computer</span></div>
+  </div>
+  <div class="h-more rv"><a class="h-link" href="firm.html">Open the whole firm</a></div>
+</section>
+
+<!-- ============================================================ tagline -->
+<section class="h-tag" aria-label="What it does">
+  <p id="tagline">Every client, every market move, checked before the phone rings.</p>
+</section>
+
+<!-- ============================================================ how it works -->
+<section class="h-sec">
+  <div class="h-head rv">
+    <p class="gb-eyebrow">How it works</p>
+    <h2 class="gb-h">Three steps, about one second.</h2>
+  </div>
+  <ol class="h-how rv">
+    <li><i>1</i><b>Tell it about the family</b><p>Ages, Social Security, pensions, savings, spending, and what worries them. Ten easy questions.</p></li>
+    <li><i>2</i><b>It lives a thousand lifetimes</b><p>Good markets and bad, long lives and short, plus every real year since 1928, with taxes and Medicare done right.</p></li>
+    <li><i>3</i><b>It shows what breaks, and the fix</b><p>The one event that would hurt most, in plain words, and the smallest change that makes the plan safe again.</p></li>
+  </ol>
+  <div class="h-brain rv">
+    <div>
+      <b>The trick that makes the whole firm possible</b>
+      <p>A planning engine takes a moment per family. That's fine for one meeting, too slow for 100,000. So a small neural network studied the engine on 75,000 practice households until it could give the same answers thousands of times faster, and it's still checked against the engine whenever it matters.</p>
+    </div>
+    <a class="gb-btn ghost" href="lab.html">Look inside the brain</a>
+  </div>
+</section>
+
+<!-- ============================================================ FAQ -->
+<section class="h-sec">
+  <div class="h-head rv"><h2 class="gb-h">Questions people ask</h2></div>
+  <div class="h-faq rv">
+    <details><summary>Is this financial advice?</summary><p>No. It's education and decision support: a way to see a plan's weak spots so a family and their advisor can talk about them.</p></details>
+    <details><summary>Are these real clients?</summary><p>No. Every household here is made up. The markets are real: actual stock, bond and inflation history since 1928, and daily S&amp;P 500 closes for the replays.</p></details>
+    <details><summary>If I try it on my parents, where does that go?</summary><p>Nowhere. The planning engine runs inside your browser tab. Nothing you type is sent to a server or saved.</p></details>
+    <details><summary>What does "89 out of 100" mean?</summary><p>It lived out the plan in 1,000 different possible futures. In 89 of every 100, the money lasted as long as they did.</p></details>
+    <details><summary>How accurate is the fast brain?</summary><p>On households it never saw, it lands within about 1.3 points of the full engine. Where it isn't sure, near a cliff edge, the engine checks it again.</p></details>
+    <details><summary>Who built this?</summary><p>Peyton Thalman, a financial advisor who wanted to see why plans break, not just whether they do.</p></details>
+  </div>
+</section>
+
+<!-- ============================================================ final CTA -->
+<section class="h-final rv">
+  <h2 class="gb-h">Try it on your family.</h2>
+  <p>Five short questions. See what could break the plan, and the gentlest fix.</p>
+  <a class="gb-btn lg" href="try.html">Try it on your family</a>
+</section>
+
 </main>
 
-<section class="meet" id="meeting" hidden></section>
-<section class="brief" id="brief" hidden></section>
-<div class="story" id="story" hidden><div class="story-bar"><i id="storyProg"></i></div><div class="story-text" id="storyText"></div><div class="story-foot"><span id="storyStep"></span><span><button id="storyNext">Next →</button><button id="storyEnd">End</button></span></div></div>
-<div class="hx-tip" id="tip" hidden></div>
-<script type="module" src="js/household/household.js"></script>
+<footer class="gb-foot">
+  <span>Glass Brain · built by Peyton Thalman · education and decision support, not personal advice</span>
+  <nav><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a><a href="lab.html">How it works</a></nav>
+</footer>
+
+<script type="module" src="js/home.js"></script>
 </body>
 </html>

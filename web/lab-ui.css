@@ -1,0 +1,21 @@
+/* The lab in the calmer system: the shared nav, plain tab names, and one sentence saying what each tab shows. */
+
+body::after { display: none !important; }
+.lab-top { padding-bottom: 8px; }
+.lab-top .gb-nav { position: relative; top: 0; margin-top: 12px; }
+.top { justify-content: center; border-bottom: 0 !important; padding: 16px 16px 0 !important; gap: 12px !important; }
+.top .mark { display: none; }
+.modes { border-radius: 9999px !important; background: var(--card) !important; }
+.modes button { font: 500 13px/20px var(--sans) !important; padding: 6px 12px !important; border-radius: 9999px !important; color: var(--muted); }
+.modes button.on { background: var(--text) !important; color: #000 !important; }
+.modes button span { display: none; }
+.tour-btn, .about-btn { font-family: var(--sans) !important; border-radius: 9999px !important; }
+.lab-cap { max-width: 760px; margin: 12px auto 0; padding: 0 16px; text-align: center; color: var(--muted); font: 400 14px/20px var(--sans); text-wrap: balance; min-height: 40px; }
+.boot-mark { font: 600 48px/1 var(--sans) !important; letter-spacing: -0.03em; }
+.boot-sub { font-family: var(--sans) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.about-card h1 { font: 600 36px/40px var(--sans) !important; letter-spacing: -0.02em; }
+.about-card h3 { font: 600 16px/24px var(--sans) !important; text-transform: none !important; letter-spacing: 0 !important; color: var(--text) !important; }
+.about-card { border-radius: 24px !important; background: #0d0d0d !important; }
+.cta { border-radius: 9999px !important; font-family: var(--sans) !important; }
+.verdict-big { font-family: var(--sans) !important; font-weight: 600 !important; letter-spacing: -0.03em; }
+@media (max-width: 900px) { .top { flex-wrap: wrap; } }

@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "glass-brain", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "8787", "--directory", "web"], "port": 8787 }
+  ]
+}

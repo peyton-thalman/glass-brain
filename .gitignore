@@ -1,0 +1,9 @@
+# Generated training datasets (rebuild with the scripts in train/, see README)
+train/*.f32
+train/*.npz
+train/mg_data.json
+train/roth_data.json
+node_modules/
+__pycache__/
+.DS_Store
+.vercel

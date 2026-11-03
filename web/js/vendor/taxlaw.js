@@ -1,0 +1,201 @@
+// Bundled from ~/moneyguide/src/engine/tax.ts + law.ts (2026 federal law, IRS Rev. Proc. 2025-32 / P.L. 119-21). Do not edit; rebuild with esbuild.
+
+// src/engine/law.ts
+var LAW_2025 = {
+  year: 2025,
+  ordinary: {
+    mfj: [[23850, 0.1], [96950, 0.12], [206700, 0.22], [394600, 0.24], [501050, 0.32], [751600, 0.35], [Infinity, 0.37]],
+    single: [[11925, 0.1], [48475, 0.12], [103350, 0.22], [197300, 0.24], [250525, 0.32], [626350, 0.35], [Infinity, 0.37]]
+  },
+  ltcg: {
+    mfj: [[96700, 0], [600050, 0.15], [Infinity, 0.2]],
+    single: [[48350, 0], [533400, 0.15], [Infinity, 0.2]]
+  },
+  standardDeduction: { mfj: 31500, single: 15750 },
+  std65: { mfj: 1600, single: 2e3 },
+  senior: { amount: 6e3, threshold: { mfj: 15e4, single: 75e3 }, rate: 0.06, lastYear: 2028 },
+  ssBase: { mfj: [32e3, 44e3], single: [25e3, 34e3] },
+  niit: { rate: 0.038, threshold: { mfj: 25e4, single: 2e5 } },
+  irmaa: {
+    partB: 185,
+    tiers: {
+      mfj: [212e3, 266e3, 334e3, 4e5, 75e4],
+      single: [106e3, 133e3, 167e3, 2e5, 5e5]
+    },
+    partBTotal: [185, 259, 370, 480.9, 591.9, 628.9],
+    partDAdd: [0, 13.7, 35.3, 57, 78.6, 85.8]
+  },
+  estate: { exemption: 1399e4, rate: 0.4 },
+  sources: {
+    ordinary: "IRS Rev. Proc. 2024-40 \xA72.01",
+    ltcg: "IRS Rev. Proc. 2024-40 \xA72.03",
+    standardDeduction: "P.L. 119-21 (OBBBA) \xA770102, replacing Rev. Proc. 2024-40 \xA72.15 ($15,000 / $30,000); confirmed by Rev. Proc. 2025-32 \xA73.01",
+    std65: "IRS Rev. Proc. 2024-40 \xA72.15",
+    senior: "IRC \xA7151(d)(5)(C), added by P.L. 119-21 (OBBBA) \xA770103; Form 1040 Schedule 1-A Part V, lines 35-36b",
+    ssBase: "IRC \xA786(c)",
+    niit: "IRC \xA71411",
+    irmaa: "CMS 2025 Medicare Parts B & D premiums fact sheet",
+    estate: "IRS Rev. Proc. 2024-40 \xA72.41"
+  }
+};
+var LAW_2026 = {
+  year: 2026,
+  ordinary: {
+    mfj: [[24800, 0.1], [100800, 0.12], [211400, 0.22], [403550, 0.24], [512450, 0.32], [768700, 0.35], [Infinity, 0.37]],
+    single: [[12400, 0.1], [50400, 0.12], [105700, 0.22], [201775, 0.24], [256225, 0.32], [640600, 0.35], [Infinity, 0.37]]
+  },
+  ltcg: {
+    mfj: [[98900, 0], [613700, 0.15], [Infinity, 0.2]],
+    single: [[49450, 0], [545500, 0.15], [Infinity, 0.2]]
+  },
+  standardDeduction: { mfj: 32200, single: 16100 },
+  std65: { mfj: 1650, single: 2050 },
+  senior: { amount: 6e3, threshold: { mfj: 15e4, single: 75e3 }, rate: 0.06, lastYear: 2028 },
+  ssBase: { mfj: [32e3, 44e3], single: [25e3, 34e3] },
+  niit: { rate: 0.038, threshold: { mfj: 25e4, single: 2e5 } },
+  irmaa: {
+    partB: 202.9,
+    tiers: {
+      mfj: [218e3, 274e3, 342e3, 41e4, 75e4],
+      single: [109e3, 137e3, 171e3, 205e3, 5e5]
+    },
+    partBTotal: [202.9, 284.1, 405.8, 527.5, 649.2, 689.9],
+    partDAdd: [0, 14.5, 37.5, 60.4, 83.3, 91]
+  },
+  estate: { exemption: 15e6, rate: 0.4 },
+  sources: {
+    ordinary: "IRS Rev. Proc. 2025-32 \xA74.01; rates made permanent by P.L. 119-21 (OBBBA)",
+    ltcg: "IRS Rev. Proc. 2025-32 \xA74.03",
+    standardDeduction: "IRS Rev. Proc. 2025-32 \xA74.14, as set by P.L. 119-21",
+    std65: "IRS Rev. Proc. 2025-32 \xA74.14",
+    senior: "IRC \xA7151(d)(5)(C), added by P.L. 119-21 (OBBBA) \xA770103; Form 1040 Schedule 1-A Part V, lines 35-36b",
+    ssBase: "IRC \xA786(c)",
+    niit: "IRC \xA71411",
+    irmaa: "CMS 2026 Medicare Parts B & D premiums fact sheet",
+    estate: "P.L. 119-21 (OBBBA)"
+  }
+};
+var LAW = { 2025: LAW_2025, 2026: LAW_2026 };
+var LAW_YEAR = 2026;
+var lawFor = (year) => LAW[year];
+
+// src/engine/tax.ts
+var L26 = LAW[LAW_YEAR];
+var ORDINARY = L26.ordinary;
+var LTCG = L26.ltcg;
+var STD_DEDUCTION = L26.standardDeduction;
+var STD_65 = L26.std65;
+var SENIOR = L26.senior;
+var SS_BASE = L26.ssBase;
+var NIIT = L26.niit;
+var IRMAA = L26.irmaa;
+var ESTATE = L26.estate;
+var flat = (br) => ({ hi: br.map((x) => x[0]), r: br.map((x) => x[1]) });
+var FLATS = /* @__PURE__ */ new Map();
+function flats(law) {
+  let f = FLATS.get(law);
+  if (!f) {
+    f = { ord: { mfj: flat(law.ordinary.mfj), single: flat(law.ordinary.single) }, ltcg: { mfj: flat(law.ltcg.mfj), single: flat(law.ltcg.single) } };
+    FLATS.set(law, f);
+  }
+  return f;
+}
+function bracketTax(income, f, k) {
+  let tax = 0, lo = 0;
+  const hi = f.hi, r = f.r;
+  for (let i = 0; i < hi.length; i++) {
+    if (income <= lo) break;
+    const h = hi[i] * k;
+    tax += ((income < h ? income : h) - lo) * r[i];
+    lo = h;
+  }
+  return tax;
+}
+function taxableSocialSecurity(ss, otherIncome, filing, law = L26) {
+  if (ss <= 0) return 0;
+  const [b1, b2] = law.ssBase[filing];
+  const prov = otherIncome + ss / 2;
+  if (prov <= b1) return 0;
+  if (prov <= b2) return Math.min(ss / 2, (prov - b1) / 2);
+  return Math.min(0.85 * ss, 0.85 * (prov - b2) + Math.min(ss / 2, (b2 - b1) / 2));
+}
+function seniorDeductionPerPerson(magi, filing, year, law = L26) {
+  const s = law.senior;
+  if (year > s.lastYear) return 0;
+  return Math.max(0, s.amount - Math.max(0, magi - s.threshold[filing]) * s.rate);
+}
+function computeTax(i) {
+  const k = i.index;
+  const law = i.law ?? L26;
+  const f = flats(law);
+  const otherIncome = i.wages + i.ordinary + i.ltcg;
+  const taxableSS = taxableSocialSecurity(i.ssBenefits, otherIncome, i.filing, law);
+  const agi = otherIncome + taxableSS;
+  const magi = agi;
+  const standardDeduction = (law.standardDeduction[i.filing] + law.std65[i.filing] * i.over65) * k;
+  const seniorDeduction = i.over65 * seniorDeductionPerPerson(magi, i.filing, i.year, law);
+  const deduction = standardDeduction + seniorDeduction;
+  const taxableIncome = Math.max(0, agi - deduction);
+  const ordTaxable = Math.max(0, taxableIncome - i.ltcg);
+  const ordinaryTax = bracketTax(ordTaxable, f.ord[i.filing], k);
+  const gains = taxableIncome - ordTaxable;
+  const ltcgTax = gains > 0 ? bracketTax(ordTaxable + gains, f.ltcg[i.filing], k) - bracketTax(ordTaxable, f.ltcg[i.filing], k) : 0;
+  const niit = law.niit.rate * Math.max(0, Math.min(i.ltcg + (i.investmentInterest ?? 0), magi - law.niit.threshold[i.filing]));
+  const federal = ordinaryTax + ltcgTax + niit;
+  const stateBase = Math.max(0, agi - (i.stateTaxesSS ? 0 : taxableSS) - law.standardDeduction[i.filing] * k * 0.5);
+  const state = stateBase * i.stateRate;
+  let bracketRate = 0.37, bracketRoom = Infinity;
+  const of = f.ord[i.filing];
+  for (let j = 0; j < of.hi.length; j++) {
+    const h = of.hi[j] * k;
+    if (ordTaxable < h) {
+      bracketRate = of.r[j];
+      bracketRoom = h - ordTaxable;
+      break;
+    }
+  }
+  return { agi, magi, taxableSS, standardDeduction, seniorDeduction, deduction, taxableIncome, ordinaryTax, ltcgTax, niit, federal, state, total: federal + state, bracketRate, bracketRoom };
+}
+function bracketTop(rate, filing, index, law = L26) {
+  const b = law.ordinary[filing].find(([, r]) => r === rate);
+  return b ? b[0] * index : 0;
+}
+function irmaaTier(magi, filing, index, law = L26) {
+  const t = law.irmaa.tiers[filing];
+  let tier = 0;
+  for (let j = 0; j < t.length; j++) {
+    const top = j === t.length - 1;
+    if (top ? magi >= t[j] : magi > t[j] * index) tier = j + 1;
+  }
+  return tier;
+}
+function medicareAnnual(tier, law = L26) {
+  return (law.irmaa.partBTotal[tier] + law.irmaa.partDAdd[tier]) * 12;
+}
+var ULT = [27.4, 26.5, 25.5, 24.6, 23.7, 22.9, 22, 21.1, 20.2, 19.4, 18.5, 17.7, 16.8, 16, 15.2, 14.4, 13.7, 12.9, 12.2, 11.5, 10.8, 10.1, 9.5, 8.9, 8.4, 7.8, 7.3, 6.8, 6.4, 6, 5.6, 5.2, 4.9, 4.6, 4.3, 4.1, 3.9, 3.7, 3.5, 3.4, 3.3, 3.1, 3, 2.9, 2.8, 2.7, 2.5, 2.3, 2];
+var rmdDivisor = (age) => ULT[Math.min(ULT.length - 1, Math.max(0, Math.floor(age) - 72))];
+var rmdStartAge = (birthYear) => birthYear >= 1960 ? 75 : birthYear >= 1951 ? 73 : 72;
+var rmdApplicableAge = (birthYear, birthMonth = 1) => birthYear < 1949 || birthYear === 1949 && birthMonth < 7 ? 70.5 : rmdStartAge(birthYear);
+export {
+  ESTATE,
+  IRMAA,
+  LAW,
+  LAW_YEAR,
+  LTCG,
+  NIIT,
+  ORDINARY,
+  SENIOR,
+  SS_BASE,
+  STD_65,
+  STD_DEDUCTION,
+  bracketTop,
+  computeTax,
+  irmaaTier,
+  lawFor,
+  medicareAnnual,
+  rmdApplicableAge,
+  rmdDivisor,
+  rmdStartAge,
+  seniorDeductionPerPerson,
+  taxableSocialSecurity
+};

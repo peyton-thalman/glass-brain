@@ -10,8 +10,8 @@
   --line: rgba(255, 255, 255, 0.08);
   --line-2: rgba(255, 255, 255, 0.14);
   --text: #f7f8f8;
-  --muted: #8a8f98;
-  --faint: #5c6068;
+  --muted: #b4b8bf;
+  --faint: #868b93;
   --accent: #8d90ff;
   --accent-soft: rgba(141, 144, 255, 0.14);
   --good: #4cc38a;
@@ -24,7 +24,7 @@
   --ice-soft: rgba(141, 144, 255, 0.14);
   --serif: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --mono: 'Geist Mono', ui-monospace, monospace;
+  --mono: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
   color-scheme: dark;
 }
@@ -152,3 +152,35 @@ em, i:not([class]) { font-style: normal; }
 .btn.primary { background: var(--text) !important; color: #000 !important; border-color: transparent !important; }
 .seg button { font-family: var(--sans) !important; letter-spacing: 0 !important; text-transform: none !important; }
 .seg button.on { background: rgba(255, 255, 255, 0.1) !important; color: var(--text) !important; border-color: transparent !important; }
+
+/* numbers line up in columns everywhere */
+body { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- sliders: a thin track, a filled part, a plain white knob */
+input[type='range'] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 24px; margin: 0; background: transparent; cursor: pointer;
+  --p: 50%; accent-color: auto;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 9999px; background: linear-gradient(90deg, var(--text) var(--p), rgba(255, 255, 255, 0.14) var(--p));
+}
+input[type='range']::-moz-range-track { height: 4px; border-radius: 9999px; background: rgba(255, 255, 255, 0.14); }
+input[type='range']::-moz-range-progress { height: 4px; border-radius: 9999px; background: var(--text); }
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 9999px; border: 0;
+  background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); transition: transform 0.3s var(--ease);
+}
+input[type='range']::-moz-range-thumb { width: 18px; height: 18px; border-radius: 9999px; border: 0; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+input[type='range']:active::-webkit-slider-thumb { transform: scale(1.15); }
+input[type='range']:focus-visible { outline: none; }
+input[type='range']:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--accent-soft); }
+
+/* icons (Phosphor) sit on the text baseline */
+.ph, .ph-fill, .ph-bold { line-height: 1; vertical-align: -0.125em; }
+
+/* soft chips for short facts, never monospace */
+.chip, .gb-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; border: 0 !important;
+  font: 500 12px/16px var(--sans) !important; letter-spacing: 0 !important; text-transform: none !important;
+  background: rgba(255, 255, 255, 0.07); color: var(--text);
+}

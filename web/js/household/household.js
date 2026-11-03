@@ -319,40 +319,20 @@ function renderBreaks() {
   } else {
     title = seq ? 'It isn\'t the average return. <em>It\'s the first ten years.</em>' : inflDriven ? 'What breaks it is <em>inflation</em>.' : 'Where this plan <em>breaks</em>.';
     const eraTxt = d.eras.map((e) => `${e.name} (${e.from === e.to ? e.from : `${e.from}–${e.to}`})`).join(', ');
-    lede = `Replayed through every start year since 1928, with real returns and real inflation. It failed <b>${d.failed} times</b>: ${esc(eraTxt)}.`;
+    lede = `We started this plan in every real year since 1928 and used the markets and prices that followed. It ran out of money <b>${d.failed} times</b>: ${esc(eraTxt)}.`;
     if (seq) say = `In the years this plan failed, the portfolio <em>${d.badFirst10 < 0 ? 'lost' : 'earned only'} ${pct(Math.abs(d.badFirst10))} a year</em> after inflation for the first decade, against ${pct(d.goodFirst10)} in the years it worked.${later ? ` After year ten, those same failed retirements earned <em>${pct(d.badAfter10)} a year, more</em> than the ones that worked. It was too late: the withdrawals had already come out of a shrinking pile.` : ''}`;
     else if (inflDriven) say = `In the failing years inflation averaged <em>${pct(d.badInfl)}</em> for the first decade, against ${pct(d.goodInfl)} when it worked. Spending rises with prices, and fixed income doesn't.`;
   }
   const worst = d.worst;
   if (S.selYear == null || !v.history.some((y) => y.year === S.selYear)) S.selYear = (worst || d.closest).year;
-  const bars = (seq || inflDriven || d.failed === 0) ? `
-    <div class="diag">
-      <div class="diag-box"><h4>Portfolio return after inflation</h4>
-        ${cmpRows([['First 10 years', d.badFirst10, d.goodFirst10], ['Years 11+', d.badAfter10, d.goodAfter10]], d.failed > 0)}
-      </div>
-      <div class="diag-box"><h4>Inflation, first 10 years</h4>
-        ${cmpRows([['Inflation', d.badInfl, d.goodInfl]], d.failed > 0)}
-        <div class="key"><span><i style="background:var(--coral)"></i>start years that failed</span><span><i style="background:var(--good)"></i>start years that worked</span></div>
-      </div>
-    </div>` : '';
   $('#breaks').innerHTML = `
-    <div class="hx-kicker"><span class="n">01</span> What breaks this plan</div>
+    <div class="hx-kicker">What breaks this plan</div>
     <h2>${title}</h2>
     <p class="hx-lede">${lede}</p>
     ${strip(v)}
     ${pathPanel(v)}
-    ${bars}
     ${say ? `<p class="say">${say}</p>` : ''}`;
   $('#breaks').classList.remove('busy');
-}
-
-function cmpRows(rows, hasBad) {
-  const all = rows.flatMap(([, a, b]) => [a, b]).filter((x) => x != null);
-  const lo = Math.min(0, ...all), hi = Math.max(0.01, ...all), X = (x) => ((x - lo) / (hi - lo)) * 100;
-  const bar = (x, c) => x == null ? '' : `<i style="left:${Math.min(X(0), X(x))}%;width:${Math.abs(X(x) - X(0))}%;background:${c}"></i>`;
-  return `<div class="cmp">${rows.map(([l, a, b]) => `
-    ${hasBad ? `<span>${l}</span><div class="track"><span class="zero" style="left:${X(0)}%"></span>${bar(a, 'var(--coral)')}</div><span class="v neg">${a == null ? '—' : pct(a)}</span>` : ''}
-    <span>${hasBad ? '' : l}</span><div class="track"><span class="zero" style="left:${X(0)}%"></span>${bar(b, 'var(--good)')}</div><span class="v pos">${b == null ? '—' : pct(b)}</span>`).join('')}</div>`;
 }
 
 function strip(v) {
@@ -444,8 +424,8 @@ function renderEvents() {
   const base = S.baseP ?? null;
   const ps = S.r.events || {};
   $('#events').innerHTML = `
-    <div class="hx-kicker"><span class="n">02</span> Life events</div>
-    <h2>What could happen <em>to them</em></h2>
+    <div class="hx-kicker">Life events</div>
+    <h2>What could happen</h2>
     <p class="hx-lede">Turn anything on and the whole page re-runs as if it happened. Each card shows what that event does to the plan on its own.</p>
     <div class="ev-grid">${cat.map((e) => {
       const on = S.active[e.id] != null && S.active[e.id] !== false;
@@ -534,9 +514,9 @@ function renderCliff() {
 
 function renderFix() {
   const el = $('#fix'), r = S.r.fix, f = S.facts;
-  const head = `<div class="hx-kicker"><span class="n">03</span> The gentlest fix</div>`;
+  const head = `<div class="hx-kicker">The gentlest fix</div>`;
   if (!r) {
-    el.innerHTML = `${head}<h2>Searching for the least painful way <em>back to 85%</em>…</h2>
+    el.innerHTML = `${head}<h2>Looking for the easiest fix…</h2>
       <div class="progress"><i style="width:${Math.min(100, (S.r.fixStep || 0) * 12)}%"></i></div>
       <p class="loading">${S.r.fixStep ? `step ${S.r.fixStep} · ${S.r.fixP}%` : 'asking the engine'}</p>`;
     return;
@@ -550,7 +530,7 @@ function renderFix() {
   }
   const g = r.changes.some((c) => /guardrails/.test(c.what)) && r.cuts;
   el.innerHTML = `${head}
-    <h2>${r.reached ? `The least painful way back to <em>85%</em>` : `The best it can do with moves they'd accept`}</h2>
+    <h2>${r.reached ? `The easiest way back to 85` : `The best it can do with changes they'd accept`}</h2>
     <p class="hx-lede">The search tries every move this household said it could live with, weighs each by how much it would hurt <b>them</b> (from “What matters”), and keeps the best one at each step. Every step is checked on the engine.</p>
     <div class="fx-top">
       <div class="fx-pp">${r.before}%<span class="arrow">→</span><span class="to">${r.after}%</span></div>
@@ -575,8 +555,8 @@ function renderMath() {
     <td>${compact(x.spend)}</td><td>${compact(x.tax)}</td><td>${Math.round(x.rate * 100)}%</td><td>${x.irmaa ? `tier ${x.irmaa}` : '—'}</td><td>${compact(x.end)}</td></tr>`;
   const t = r.ret, line = (l, val, note = '') => `<div class="mx-l"><span>${l}${note ? `<small>${note}</small>` : ''}</span><b>${val}</b></div>`;
   el.innerHTML = `
-    <div class="hx-kicker"><span class="n">05</span> Show the math</div>
-    <h2>Every number, <em>all the way down</em>.</h2>
+    <div class="hx-kicker">Show the math</div>
+    <h2>The money, year by year</h2>
     <p class="hx-lede">The engine's year-by-year ledger for ${esc(joinNames(f))} in average markets, in today's dollars. Click any year for that year's tax return, line by line.</p>
     <div class="mx-badges"><span>✓ 2026 brackets and deductions: IRS Rev. Proc. 2025-32 and P.L. 119-21</span><span>✓ Social Security taxation: IRS Pub 915 worksheet</span><span>✓ RMDs: IRS Uniform Lifetime Table</span><span>✓ Medicare IRMAA: CMS 2026 tiers, 2-year lookback</span><span>✓ Federal tax cross-checked against PolicyEngine-US, an independent model</span></div>
     <div class="mx">
@@ -611,7 +591,7 @@ function renderSens() {
   const lo = Math.min(...s.rows.map((r) => Math.min(r.lo, r.hi)), s.base), hi = Math.max(...s.rows.map((r) => Math.max(r.lo, r.hi)), s.base);
   const span = Math.max(1, hi - lo), X = (v) => 24 + ((v - lo) / span) * 52;
   el.innerHTML = `
-    <div class="hx-kicker"><span class="n">06</span> What it's most sensitive to</div>
+    <div class="hx-kicker">What it's most sensitive to</div>
     <h2><em>${esc(top.label)}</em> ${ratio && ratio >= 1.3 ? `moves this plan ${ratio.toFixed(1)}× more than market returns.` : 'matters most.'}</h2>
     <p class="hx-lede">Each row is the engine re-run with one thing changed. Longer bars matter more. Center line: ${s.base}% today.</p>
     <div class="tor">${s.rows.map((r) => {
@@ -634,8 +614,8 @@ function renderInsights() {
   if (!list) return;
   el.classList.remove('busy');
   el.innerHTML = `
-    <div class="hx-kicker"><span class="n">07</span> Also worth a conversation</div>
-    <h2>What the engine's own review <em>found</em></h2>
+    <div class="hx-kicker">Also worth a conversation</div>
+    <h2>Other things worth a look</h2>
     <p class="hx-lede">The planning engine's scan of this household under today's assumptions: Social Security timing, Roth conversions, IRMAA, the survivor's tax bracket, cash reserves.</p>
     <div class="ins">${list.map((i) => `
       <div class="in-card"><div class="cat ${i.kind}">${esc(i.category)}</div><h4>${esc(i.title)}</h4><p>${esc(i.detail)}</p>${i.impact ? `<div class="imp">${esc(i.impact)}</div>` : ''}</div>`).join('') || '<p class="hx-lede">Nothing flagged.</p>'}</div>`;

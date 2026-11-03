@@ -72,7 +72,7 @@ async function hero() {
   const runs = v.history.filter((h) => !h.wraps);
   const ok = runs.filter((r) => r.ok).length, bad = runs.length - ok;
   const eras = v.diagnosis.eras.map((e) => e.name);
-  $('#heroCap').innerHTML = `In <b>${ok} of ${runs.length}</b> real start years their money lasted. The ${bad} that failed all began with a bad first decade${eras.length ? `, like ${eras.slice(0, 2).join(' and ')}` : ''}.`;
+  $('#heroCap').innerHTML = `Each line is one starting year. Their money lasted in <b>${ok} of ${runs.length}</b>. The ${bad} red ones all started with ten rough years for the market${eras.length ? `, like ${eras[0]}` : ''}.`;
   heroPaths.runs = runs;
   drawHero(reduce ? 1 : 0);
   if (!reduce) {
@@ -135,11 +135,11 @@ function whatIfs(base, evs) {
   const deathAge = Math.min(d.planTo - 1, d.age + 4), careAge = Math.max(85, d.age + 3);
   const by = Object.fromEntries(evs.map((e) => [e.id, e.p]));
   return [
-    { id: 'base', label: 'As planned', p: base, why: `In most futures, ${d.first}'s pension and two Social Security checks cover nearly everything, and their savings quietly fill the gap.` },
-    { id: 'death0', label: `${d.first} dies at ${deathAge}`, p: by.death0, why: `${d.first} picked the pension that pays only while he's alive. If he dies first, <b>${money(pen.monthly)} a month stops</b>, his larger Social Security check replaces ${m.first}'s smaller one, and she has to pull far more from savings.` },
-    { id: 'ltc', label: `${d.first} needs care at ${careAge}`, p: by.ltc, why: `Three years of care runs about <b>$110,000 a year</b>. With no care insurance, all of it comes straight out of their savings.` },
-    { id: 'crash', label: 'Stocks crash now', p: by.crash, why: `Two bad years right at the start, while they're already withdrawing, do damage that good years later can't undo.` },
-    { id: 'ssCut', label: 'Social Security is cut', p: by.ssCut, why: `If Congress does nothing, checks could shrink about <b>23% in 2033</b>. Every month they'd need more from savings.` },
+    { id: 'base', label: 'As planned', p: base, why: `Dale's pension and their two Social Security checks pay for most of their bills. Savings cover the rest.` },
+    { id: 'death0', label: `${d.first} dies at ${deathAge}`, p: by.death0, why: `${d.first}'s pension stops when he dies. ${m.first} would lose <b>${money(pen.monthly)} a month</b> and one Social Security check, but most of her bills stay the same.` },
+    { id: 'ltc', label: `${d.first} needs care at ${careAge}`, p: by.ltc, why: `Three years in care costs about <b>$110,000 a year</b>. They have no care insurance, so it all comes out of savings.` },
+    { id: 'crash', label: 'Stocks crash now', p: by.crash, why: `Two bad years right away hurt the most, because they're selling investments at low prices to pay the bills.` },
+    { id: 'ssCut', label: 'Social Security is cut', p: by.ssCut, why: `If Congress does nothing, checks could shrink about <b>23% in 2033</b>. They'd need more from savings every month.` },
   ].filter((x) => x.p != null);
 }
 
@@ -242,13 +242,13 @@ async function book() {
   const sorted = Array.from({ length: n }, (_, i) => i).sort((a, b) => base[b] - base[a]);
   const cv = $('#bkField');
   const draw = (ps) => {
-    const w = cv.clientWidth, cols = w < 520 ? 50 : 100, cell = w / cols, rows = Math.ceil(n / cols);
+    const w = cv.clientWidth, cols = w < 520 ? 40 : w < 900 ? 80 : 100, cell = w / cols, rows = Math.ceil(n / cols);
     const { g } = fitCanvas(cv, rows * cell);
     cv.style.height = rows * cell + 'px';
-    const gap = cell > 6 ? 1.5 : 0.75;
+    const r = cell * 0.36;
     sorted.forEach((idx, k) => {
       g.fillStyle = planColor(ps[idx]);
-      g.fillRect((k % cols) * cell + gap / 2, Math.floor(k / cols) * cell + gap / 2, cell - gap, cell - gap);
+      g.beginPath(); g.arc((k % cols) * cell + cell / 2, Math.floor(k / cols) * cell + cell / 2, r, 0, Math.PI * 2); g.fill();
     });
   };
   let last = base;

@@ -49,3 +49,18 @@ body { font: 400 14px/20px var(--sans); }
 @media (max-width: 1100px) { .hx-xray { order: -1; } }
 .ask-h span, .ask-ok, .ask-m { font-family: var(--sans) !important; letter-spacing: 0 !important; text-transform: none !important; }
 .hx-intake, .bk-flags { top: 80px !important; max-height: calc(100vh - 96px) !important; }
+
+/* flag chips: soft, sans, colored by meaning */
+.bk-chip { font: 500 12px/16px var(--sans) !important; letter-spacing: 0 !important; text-transform: none !important; border: 0 !important; border-radius: 9999px !important; padding: 4px 8px !important; background: rgba(255,255,255,0.07) !important; color: var(--text) !important; }
+.bk-chip.red { background: var(--coral-soft) !important; color: #ff8a80 !important; }
+.bk-chip.amber { background: var(--amber-soft) !important; color: #f5c46e !important; }
+.bk-chip.green { background: var(--good-soft) !important; color: #6fd8a3 !important; }
+
+/* firm regions: soft tiles with breathing room */
+.fm-region { border-radius: 16px !important; padding: 16px !important; background: var(--raise); border-color: transparent !important; }
+.fm-tiles { gap: 6px !important; }
+.fm-tiles i { border-radius: 6px !important; }
+.fm-rh b { font: 600 14px/20px var(--sans) !important; }
+#fieldKey i, .key i { border-radius: 9999px !important; }
+@media (max-width: 1100px) { .hx-families { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 480px) { .hx-families { grid-template-columns: 1fr !important; } }

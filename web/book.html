@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23000'/%3E%3Ccircle cx='7.5' cy='14' r='2.2' fill='%238d90ff'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%23fff'/%3E%3Ccircle cx='16.5' cy='14' r='2.2' fill='%234cc38a'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="household.css">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="js/ui.js" defer></script>
 <link rel="stylesheet" href="ui.css">
 <link rel="stylesheet" href="pages.css">
 </head>
@@ -19,7 +21,7 @@
   <a class="gb-link" href="household.html">Family</a>
   <a class="gb-link" href="book.html" aria-current="page">Advisor</a>
   <a class="gb-link" href="firm.html">Firm</a>
-  <a class="gb-link opt" href="lab.html">How it works</a>
+  <a class="gb-link opt" href="how.html">How it works</a>
   <a class="gb-cta" href="try.html">Try it</a>
 </nav>
 
@@ -49,9 +51,9 @@
 
 <main class="bk-main">
   <section class="hx-card bk-field">
-    <div class="hx-kicker"><span class="n">4,000</span> households, one cell each</div>
+    <div class="hx-kicker"><span class="n">4,000</span> families, one dot each</div>
     <h2 id="fieldHead">The whole book</h2>
-    <p class="hx-lede">Each square is a family, always in the same spot, safest at the top. Green is on track, amber is worth a look, red needs a call. Click any square.</p>
+    <p class="hx-lede">Each dot is a family, always in the same spot, safest at the top. Green is on track, amber is worth keeping an eye on, red means call them. Click any dot.</p>
     <canvas id="field"></canvas>
     <div class="key" id="fieldKey"></div>
   </section>
@@ -76,7 +78,7 @@
 
 <footer class="gb-foot">
   <span>Glass Brain · built by Peyton Thalman · education and decision support, not personal advice</span>
-  <nav><a href="./">Home</a><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a><a href="lab.html">How it works</a></nav>
+  <nav><a href="./">Home</a><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a><a href="how.html">How it works</a></nav>
 </footer>
 
 <section class="meet" id="monday" hidden></section>

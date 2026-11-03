@@ -94,14 +94,15 @@ body { font: 400 16px/24px var(--sans); margin: 0; overflow-x: hidden; }
 .h-spark { width: 100%; height: 48px; display: block; margin-bottom: 16px; }
 #bkField { width: 100%; display: block; border-radius: 8px; }
 .h-key { display: flex; gap: 8px 16px; justify-content: center; flex-wrap: wrap; align-items: center; margin-top: 16px; color: var(--muted); font-size: 14px; line-height: 20px; }
-.h-key i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: -8px; }
+.h-key i { width: 10px; height: 10px; border-radius: 9999px; display: inline-block; margin-right: -8px; }
 @media (max-width: 560px) { .h-book, .h-firm { padding: 16px; border-radius: 16px; } .h-mkt, .h-count b { font-size: 36px; } }
 
-.h-tiles { display: grid; grid-template-columns: repeat(25, 1fr); gap: 4px; }
-.h-tiles i { aspect-ratio: 1; border-radius: 3px; background: #1a1a1a; transition: background 0.8s var(--ease); }
-@media (max-width: 560px) { .h-tiles { gap: 2px; } .h-tiles i { border-radius: 2px; } }
+.h-tiles { display: grid; grid-template-columns: repeat(25, 1fr); gap: 6px; }
+.h-tiles i { aspect-ratio: 1; border-radius: 6px; background: #1a1a1a; transition: background 0.8s var(--ease); }
+@media (max-width: 560px) { .h-tiles { gap: 3px; } .h-tiles i { border-radius: 3px; } }
 .h-speed { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
 .h-speed > div { border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 24px; }
+.h-speed .ph { font-size: 24px; color: var(--muted); display: block; margin-bottom: 12px; }
 .h-speed b { display: block; font: 600 36px/40px var(--sans); letter-spacing: -0.02em; }
 .h-speed b.acc { color: var(--accent); }
 .h-speed span { color: var(--muted); font-size: 14px; line-height: 20px; }
@@ -117,7 +118,7 @@ body { font: 400 16px/24px var(--sans); margin: 0; overflow-x: hidden; }
 /* how it works */
 .h-how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .h-how li { border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 24px; }
-.h-how i { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 9999px; background: var(--accent-soft); color: var(--accent); font: 600 14px/20px var(--sans); font-style: normal; margin-bottom: 16px; }
+.h-how i { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 20px; margin-bottom: 16px; }
 .h-how b { display: block; font: 600 18px/28px var(--sans); }
 .h-how p { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 20px; text-wrap: pretty; }
 .h-brain { margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); padding: 24px; }
@@ -139,3 +140,7 @@ body { font: 400 16px/24px var(--sans); margin: 0; overflow-x: hidden; }
 .h-final .gb-h { font-size: 60px; }
 .h-final p { color: var(--muted); font-size: 18px; line-height: 28px; margin: 16px 0 32px; }
 @media (max-width: 560px) { .h-final { padding-top: 96px; } .h-final .gb-h { font-size: 36px; line-height: 40px; } }
+
+.gb-eyebrow .ph { font-size: 16px; }
+.h-proof .ph { font-size: 16px; }
+.h-head > p:not(.gb-eyebrow) { color: var(--muted); }

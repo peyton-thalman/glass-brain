@@ -10,7 +10,7 @@ export const FAMILIES = [
   {
     id: 'kowalski',
     name: 'Dale & Marilyn Kowalski',
-    tagline: 'Auto-plant pension, single-life payout, 7 years apart',
+    tagline: 'His pension stops if he dies first',
     story: 'Moved down from Michigan in 2015. Dale took the single-life option on his pension because the check was bigger. Marilyn keeps the books.',
     people: [
       { first: 'Dale', age: 78, sex: 'M', health: 'average', planTo: 92, retiredAt: 62, ssMonthly: 2900, claimAge: 65 },
@@ -26,7 +26,7 @@ export const FAMILIES = [
   {
     id: 'pederson',
     name: 'Joan Pederson',
-    tagline: 'Widowed teacher, solid pension, worried about care',
+    tagline: 'Widowed teacher, worried about paying for care',
     story: 'Retired Minnesota schoolteacher, widowed in 2021. Plays bridge three days a week. Her mother needed five years of memory care.',
     people: [
       { first: 'Joan', age: 74, sex: 'F', health: 'good', planTo: 97, retiredAt: 60, ssMonthly: 1400, claimAge: 67 },
@@ -42,7 +42,7 @@ export const FAMILIES = [
   {
     id: 'alvarez',
     name: 'Rick & Sue Alvarez',
-    tagline: 'Just retired, big 401(k), first decade decides everything',
+    tagline: 'Just retired, big 401(k), big travel plans',
     story: 'Engineer and nurse from the Chicago suburbs, retired this spring. Big travel plans, a cabin in Wisconsin, and almost everything in pre-tax money.',
     people: [
       { first: 'Rick', age: 65, sex: 'M', health: 'good', planTo: 94, retiredAt: 65, ssMonthly: 3600, claimAge: 67 },
@@ -58,7 +58,7 @@ export const FAMILIES = [
   {
     id: 'hoffman',
     name: 'Gary & Linda Hoffman',
-    tagline: 'Social Security, a modest IRA, no room for surprises',
+    tagline: 'Mostly Social Security, little cushion',
     story: 'Ran a hardware store in Iowa for 30 years and sold it for less than they hoped. Both claimed Social Security early. Linda still works mornings at the rec center.',
     people: [
       { first: 'Gary', age: 70, sex: 'M', health: 'poor', planTo: 90, retiredAt: 64, ssMonthly: 2300, claimAge: 62 },
@@ -84,17 +84,18 @@ export function toPlan(P, f) {
   const person = (p, i) => ({
     firstName: p.first, lastName: f.name.split(' ').pop(), birthYear: NOW - p.age, sex: p.sex, health: p.health,
     retirementAge: p.retiredAt, acceptableRetirementAge: p.retiredAt, planningAge: Math.max(p.planTo, p.age + 1),
-    salary: 0, ssPia: i === 0 ? Math.max(p.ssMonthly, late) : p.ssMonthly, ssClaimAge: p.claimAge, lifeInsurance: 0,
+    salary: p.salary || 0, ssPia: i === 0 ? Math.max(p.ssMonthly, late) : p.ssMonthly, ssClaimAge: p.claimAge, lifeInsurance: 0,
   });
   const owner = (i) => (i === 0 ? 'client' : 'spouse');
   const a = f.accounts;
-  const acct = (id, name, ownerKey, type, balance, basis) => ({ id, name, owner: ownerKey, type, balance, basis, annualSavings: 0, savingsIncrease: 0 });
+  // Someone still working saves into their own IRA/401(k) each year until they stop (facts.accounts.save, per person).
+  const acct = (id, name, ownerKey, type, balance, basis, save = 0) => ({ id, name, owner: ownerKey, type, balance, basis, annualSavings: save, savingsIncrease: save ? 0.02 : 0 });
   const accounts = [
-    ...a.ira.map((b, i) => acct('ira' + i, `${f.people[i].first}’s IRA`, owner(i), 'deferred', b, 0)),
+    ...a.ira.map((b, i) => acct('ira' + i, `${f.people[i].first}’s IRA`, owner(i), 'deferred', b, 0, (a.save || [])[i] || 0)),
     acct('roth', 'Roth IRA', 'client', 'roth', a.roth, a.roth),
     acct('taxable', 'Brokerage', 'joint', 'taxable', a.taxable, Math.min(a.basis, a.taxable)),
     acct('cash', 'Cash & CDs', 'joint', 'cash', a.cash, a.cash),
-  ].filter((x) => x.balance > 0);
+  ].filter((x) => x.balance > 0 || x.annualSavings > 0);
   const s = f.spending;
   const goal = (id, type, name, amount, priority, extra = {}) => ({
     id, type, name, priority, amount, acceptable: amount, atRetirement: false, startYear: NOW, years: 0, repeatEvery: 0, survivorPct: 100, enabled: amount > 0, ...extra,
@@ -102,7 +103,7 @@ export function toPlan(P, f) {
   const core = s.core * 12;
   const goals = [
     goal('core', 'retirement', 'Everyday living', core, 10, { acceptable: Math.round(core * (f.feelings.cutOk === 'no' ? 1 : f.feelings.cutOk === 'some' ? 0.9 : 0.8)), atRetirement: true, survivorPct: s.survivorPct }),
-    ...s.wants.map((w, i) => goal('want' + i, 'travel', w.name, w.yearly, 6, { years: w.years, acceptable: 0 })),
+    ...s.wants.map((w, i) => goal('want' + i, 'travel', w.name, w.yearly, 6, { years: w.years, acceptable: 0, startYear: w.startYear ?? NOW })),
     goal('gifts', 'other', 'Gifts to family', s.gifts, 4, { acceptable: 0 }),
     goal('legacy', 'legacy', 'Leave to heirs', s.legacy, 3, { acceptable: 0 }),
   ];

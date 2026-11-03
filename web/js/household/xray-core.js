@@ -247,6 +247,22 @@ function fixMoves(base, facts) {
     if (!who) return;
     const age = NOW - who.birthYear;
     if (who.ssClaimAge > age) out.push({ key: 'ss' + i, pain: 0.5, apply: (p) => (p[k].ssClaimAge >= 70 ? null : ((p[k].ssClaimAge += 1), p)) });
+    // Still working: save a little more each year, or stop a year later (up to five years, never past 70).
+    if (who.salary > 0 && who.retirementAge > age) {
+      const cap = Math.min(70, who.retirementAge + 5);
+      out.push({ key: 'work' + i, pain: f.worry === 'running-out' ? 1.0 : 1.4, apply: (p) => (p[k].retirementAge >= cap ? null : ((p[k].retirementAge += 1), (p[k].acceptableRetirementAge = p[k].retirementAge), p)) });
+      out.push({
+        key: 'save' + i, pain: 0.8,
+        apply: (p) => {
+          let a = p.accounts.find((x) => x.id === 'ira' + i);
+          if (!a) p.accounts.push((a = { id: 'ira' + i, name: `${who.firstName}’s IRA`, owner: k, type: 'deferred', balance: 0, basis: 0, annualSavings: 0, savingsIncrease: 0.02 }));
+          const start = (base.accounts.find((x) => x.id === 'ira' + i) || { annualSavings: 0 }).annualSavings;
+          if (a.annualSavings >= start + 12000 || a.annualSavings >= who.salary * 0.3) return null;
+          a.annualSavings += 2400;
+          return p;
+        },
+      });
+    }
   });
   if (facts.home && facts.home.value > 0 && facts.home.open && !facts.home.downsize)
     out.push({ key: 'downsize', pain: f.worry === 'running-out' ? 1.0 : 1.6, once: true, apply: (p) => (p.inflows.some((x) => x.id === 'downsize') ? null : (p.inflows.push({ id: 'downsize', name: 'Downsize the house', year: facts.home.downsizeYear, amount: facts.home.netProceeds, gainPct: 0 }), p)) });
@@ -294,9 +310,14 @@ export function describe(a, b, facts) {
     else if (!g.enabled || g.amount < 1) out.push({ what: `Let go of “${g.name}”`, detail: `${money(o.amount)} a year` });
     else out.push({ what: `Scale “${g.name}” to ${money(g.amount)} a year`, detail: `from ${money(o.amount)}` });
   }
-  if (a.strategy.spending.policy !== b.strategy.spending.policy) out.push({ what: 'Agree to spending guardrails', detail: 'trim 10% only in years the withdrawal rate drifts 20% too high, and raise it back when markets recover' });
+  if (a.strategy.spending.policy !== b.strategy.spending.policy) out.push({ what: 'Spend 10% less in bad market years', detail: 'only when savings fall behind, then back to normal when markets recover' });
   ['client', 'spouse'].forEach((k, i) => {
     if (a[k] && b[k] && a[k].ssClaimAge !== b[k].ssClaimAge) out.push({ what: `${names[i]} claims Social Security at ${b[k].ssClaimAge}`, detail: `instead of ${a[k].ssClaimAge}` });
+  });
+  ['client', 'spouse'].forEach((k, i) => {
+    if (a[k] && b[k] && a[k].retirementAge !== b[k].retirementAge) out.push({ what: `${names[i]} works until ${b[k].retirementAge}`, detail: `instead of ${a[k].retirementAge}` });
+    const sv = (p) => (p.accounts.find((x) => x.id === 'ira' + i) || { annualSavings: 0 }).annualSavings;
+    if (sv(b) > sv(a)) out.push({ what: `${names[i]} saves ${money(sv(b) - sv(a))} more a year`, detail: `${money(sv(b))} a year in all, until retiring` });
   });
   if (!a.inflows.some((x) => x.id === 'downsize') && b.inflows.some((x) => x.id === 'downsize')) {
     const d = b.inflows.find((x) => x.id === 'downsize');

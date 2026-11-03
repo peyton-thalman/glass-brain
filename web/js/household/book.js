@@ -225,7 +225,7 @@ function flagsFor(i) {
   const f = S.book[i], e = f.engine, out = [];
   const k = growth(f, S.spx, S.bond);
   const p = pOf(i), p0 = p0Of(i);
-  if (p < 75) out.push({ kind: 'red', short: p0 >= 75 ? 'Fell below 75%' : 'Below 75%' });
+  if (p < 75) out.push({ kind: 'red', short: p0 >= 75 ? 'Newly at risk' : 'At risk' });
   let worst = null;
   for (let h = 1; h < NH; h++) {
     const v = S.probs[i * NH + h];
@@ -236,10 +236,10 @@ function flagsFor(i) {
   const ira = f.accounts.ira.reduce((s, x) => s + x, 0) * k;
   if (S.spx <= -0.1 && e.rate > 0 && e.rate <= 0.22 && e.room >= 10000 && ira > 10000 && e.irmaaRoom > 10000) {
     const amt = Math.floor(Math.min(e.room, e.irmaaRoom - 5000, ira) / 1000) * 1000;
-    if (amt >= 10000) out.push({ kind: 'green', short: `Roth window ${compact(amt)}`, roth: amt, k, rate: e.rate });
+    if (amt >= 10000) out.push({ kind: 'green', short: `Roth move: ${compact(amt)}`, roth: amt, k, rate: e.rate });
   }
-  if (e.draw > 0 && p < 90 && f.feelings.cutOk !== 'no' && investedAt(i) < S.inv0[i] / 1.2) out.push({ kind: 'amber', short: 'Guardrail check-in', guard: true });
-  if (e.irmaaRoom > 0 && e.irmaaRoom < 15000) out.push({ kind: 'plain', short: `${compact(e.irmaaRoom)} under IRMAA`, irmaa: true });
+  if (e.draw > 0 && p < 90 && f.feelings.cutOk !== 'no' && investedAt(i) < S.inv0[i] / 1.2) out.push({ kind: 'amber', short: 'Spending check-in', guard: true });
+  if (e.irmaaRoom > 0 && e.irmaaRoom < 15000) out.push({ kind: 'plain', short: `Close to a Medicare surcharge`, irmaa: true });
   return out;
 }
 
@@ -277,7 +277,7 @@ function renderStats() {
 
 // ---------------------------------------------------------------- the field
 
-const COLS = 100;
+const COLS = 80;
 function colorOf(p) {
   const stops = [[0, [242, 101, 90]], [70, [242, 101, 90]], [76, [240, 180, 76]], [86, [240, 180, 76]], [94, [76, 195, 138]]];
   let a = stops[0], b = stops[stops.length - 1];
@@ -294,21 +294,20 @@ function drawField() {
   const g = cv.getContext('2d');
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
-  const gap = cw > 6 ? 1 : 0.5;
   for (let c = 0; c < n; c++) {
     const i = S.order[c], p = pOf(i);
     const x = (c % COLS) * cw, y = Math.floor(c / COLS) * cw;
     g.fillStyle = colorOf(p);
     g.globalAlpha = p < 75 && p0Of(i) >= 75 ? 1 : 0.82;
-    g.fillRect(x, y, cw - gap, cw - gap);
+    g.beginPath(); g.arc(x + cw / 2, y + cw / 2, cw * 0.38, 0, Math.PI * 2); g.fill();
   }
   g.globalAlpha = 1;
   if (S.sel != null) {
     const c = S.cellOf[S.sel];
     g.strokeStyle = '#fff'; g.lineWidth = 2;
-    g.strokeRect((c % COLS) * cw - 1, Math.floor(c / COLS) * cw - 1, cw + 1, cw + 1);
+    g.beginPath(); g.arc((c % COLS) * cw + cw / 2, Math.floor(c / COLS) * cw + cw / 2, cw * 0.7, 0, Math.PI * 2); g.stroke();
   }
-  $('#fieldKey').innerHTML = `<span><i style="background:${colorOf(97)}"></i>95%+</span><span><i style="background:${colorOf(85)}"></i>75–90%</span><span><i style="background:${colorOf(70)}"></i>60–75%</span><span><i style="background:${colorOf(45)}"></i>below 60%</span><span>brighter cells fell below 75% since the plan date</span>`;
+  $('#fieldKey').innerHTML = `<span><i style="background:${colorOf(97)}"></i>on track</span><span><i style="background:${colorOf(80)}"></i>keep an eye on</span><span><i style="background:${colorOf(45)}"></i>call them</span>`;
 }
 
 function cellAt(e) {

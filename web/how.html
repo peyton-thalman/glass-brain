@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it works · Glass Brain</title>
+<meta name="description" content="How Glass Brain checks a retirement plan, in five plain steps.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23000'/%3E%3Ccircle cx='7.5' cy='14' r='2.2' fill='%238d90ff'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%23fff'/%3E%3Ccircle cx='16.5' cy='14' r='2.2' fill='%234cc38a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="js/ui.js" defer></script>
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="home.css">
+<link rel="stylesheet" href="try.css">
+<link rel="stylesheet" href="how.css">
+</head>
+<body>
+<nav class="gb-nav" aria-label="Main">
+  <a class="gb-logo" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M7.5 14 12 8l4.5 6" stroke="currentColor" stroke-opacity=".5" fill="none"/><circle cx="7.5" cy="14" r="2" fill="#8d90ff"/><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="#4cc38a"/></svg><span>Glass Brain</span></a>
+  <a class="gb-link" href="household.html">Family</a>
+  <a class="gb-link" href="book.html">Advisor</a>
+  <a class="gb-link" href="firm.html">Firm</a>
+  <a class="gb-link opt" href="how.html" aria-current="page">How it works</a>
+  <a class="gb-cta" href="try.html">Try it</a>
+</nav>
+
+<main id="main">
+  <header class="gb-intro">
+    <p class="gb-eyebrow">How it works</p>
+    <h1>Five steps. No jargon.</h1>
+    <p>Here's what happens when you give Glass Brain a family's plan. We'll use Dale and Marilyn as the example.</p>
+  </header>
+
+  <ol class="w-steps">
+    <li class="w-step rv">
+      <div class="w-text">
+        <span class="w-n"><i class="ph ph-user-list"></i>Step 1</span>
+        <h2>You tell it about the family.</h2>
+        <p>Their ages, what Social Security and any pension pay, what they've saved, and what they spend in a normal month. That's it.</p>
+      </div>
+      <div class="w-vis w-facts">
+        <div><span>Dale and Marilyn</span><b>78 and 71</b></div>
+        <div><span>Social Security</span><b>$4,050 a month</b></div>
+        <div><span>Dale's pension</span><b>$3,100 a month</b></div>
+        <div><span>Savings</span><b>$905,000</b></div>
+        <div><span>They spend</span><b>$6,500 a month</b></div>
+      </div>
+    </li>
+
+    <li class="w-step rv">
+      <div class="w-text">
+        <span class="w-n"><i class="ph ph-shuffle"></i>Step 2</span>
+        <h2>It plays out 1,000 possible futures.</h2>
+        <p>Some with great markets, some with terrible ones. Some where they live to 100. For each one, it checks whether the money lasts. Each dot here stands for 10 of those futures.</p>
+      </div>
+      <div class="w-vis">
+        <div class="h-dots t-dots go" id="wDots"></div>
+        <p class="w-cap" id="wDotsCap">&nbsp;</p>
+      </div>
+    </li>
+
+    <li class="w-step rv">
+      <div class="w-text">
+        <span class="w-n"><i class="ph ph-clock-counter-clockwise"></i>Step 3</span>
+        <h2>It also replays real history.</h2>
+        <p>What if they'd retired in 1929? In 1966? In 2000? It runs their plan through every real stretch of markets and prices since 1928. Each square is one starting year.</p>
+      </div>
+      <div class="w-vis">
+        <div class="t-years go" id="wYears"></div>
+        <p class="w-cap" id="wYearsCap">&nbsp;</p>
+      </div>
+    </li>
+
+    <li class="w-step rv">
+      <div class="w-text">
+        <span class="w-n"><i class="ph ph-warning-circle"></i>Step 4</span>
+        <h2>It tests the things that could go wrong.</h2>
+        <p>A death, a long stay in care, a crash right away, a Social Security cut. One at a time, so you can see which one would really hurt.</p>
+      </div>
+      <div class="w-vis">
+        <div class="t-bars go" id="wBars"><span class="sk w80"></span><span class="sk w60"></span></div>
+      </div>
+    </li>
+
+    <li class="w-step rv">
+      <div class="w-text">
+        <span class="w-n"><i class="ph ph-wrench"></i>Step 5</span>
+        <h2>It finds the easiest fix.</h2>
+        <p>It tries the changes the family said they'd be OK with, like spending a bit less in bad years or claiming Social Security later, and keeps the smallest set that makes the plan safe.</p>
+      </div>
+      <div class="w-vis w-fix">
+        <div><span class="h-fix-tag">Hoffmans today</span><b class="coral">49</b></div>
+        <i class="ph ph-arrow-right"></i>
+        <div><span class="h-fix-tag good">With one change</span><b class="good">92</b></div>
+        <p class="w-cap">The change: spend 10% less, only in years the market is down.</p>
+      </div>
+    </li>
+  </ol>
+
+  <section class="h-sec">
+    <div class="h-head rv">
+      <p class="gb-eyebrow">The fast part</p>
+      <h2 class="gb-h">How it checks 100,000 families at once.</h2>
+      <p>Doing all of that takes the full engine about a tenth of a second per family. Fine for one family. Too slow for a whole firm every time the market moves. So we trained a small AI model to copy the engine's answers, the way a student learns from thousands of worked examples.</p>
+    </div>
+    <div class="w-race rv">
+      <div class="w-lane"><span><i class="ph ph-cpu"></i>Full engine</span><div class="w-track"><i class="slow"></i></div><b>about 2.5 hours</b></div>
+      <div class="w-lane"><span><i class="ph ph-lightning"></i>Fast AI model</span><div class="w-track"><i class="fast"></i></div><b class="acc">about 2 seconds</b></div>
+      <p class="w-cap">Time to check 100,000 families once.</p>
+    </div>
+    <div class="w-trust rv">
+      <div><i class="ph ph-target"></i><b>Within about 1 point</b><p>On families it never saw, its answer lands within about 1 point of the full engine.</p></div>
+      <div><i class="ph ph-check-circle"></i><b>Checked twice</b><p>When a family is close to the edge, the full engine checks it again. Those are the numbers you see.</p></div>
+      <div><i class="ph ph-lock-simple"></i><b>Stays private</b><p>Everything runs in your browser. Nothing you type is sent anywhere.</p></div>
+    </div>
+  </section>
+
+  <section class="h-final rv">
+    <h2 class="gb-h">See it on a real family.</h2>
+    <p>Try it with your own numbers, or your parents'.</p>
+    <a class="gb-btn lg" href="try.html">Try it on your family</a>
+    <p class="w-lab">Curious what the AI model looks like inside? <a href="lab.html">Open the lab</a>. Fair warning: it's technical.</p>
+  </section>
+</main>
+
+<footer class="gb-foot">
+  <span>Glass Brain · built by Peyton Thalman · for learning and planning conversations, not personal advice</span>
+  <nav><a href="./">Home</a><a href="household.html">Family</a><a href="book.html">Advisor</a><a href="firm.html">Firm</a><a href="how.html">How it works</a></nav>
+</footer>
+<script type="module" src="js/how.js"></script>
+</body>
+</html>

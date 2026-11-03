@@ -2,7 +2,7 @@
 // opportunities a drop opens up, and the real engine one click away to check any answer.
 
 import { BookBrain } from './bookbrain.js';
-import { applyMarket, features, balances, HEADS, EQUITY } from './book-model.js';
+import { applyMarket, features, balances, growth, HEADS, EQUITY, BONDS } from './book-model.js';
 import { toPlan } from './families.js';
 import * as P from '../vendor/planner.js';
 import { headEvents } from './book-model.js';
@@ -46,13 +46,13 @@ async function boot() {
   S.cellOf = new Int32Array(S.book.length);
   S.order.forEach((h, c) => (S.cellOf[h] = c));
   renderEps();
-  setEpisode(0);
+  setEpisode(S.eps.findIndex((e) => e.id === 'lastyear'), true);
   renderTrust();
   window.addEventListener('resize', drawField);
 }
 
 /** Investments after the market move, without copying the household. */
-const investedAt = (i) => S.inv0[i] + S.risky[i] * S.spx * EQUITY[S.book[i].invest.portfolio];
+const investedAt = (i) => S.inv0[i] + S.risky[i] * (growth(S.book[i], S.spx, S.bond) - 1);
 
 function invested(f) {
   const a = f.accounts;
@@ -72,25 +72,26 @@ function startPool(brainJson) {
     const X = new Float32Array(slice.flatMap((f) => features(f)));
     const B = new Float32Array(slice.flatMap((f) => balances(f)));
     const EQ = new Float32Array(slice.map((f) => EQUITY[f.invest.portfolio]));
+    const BD = new Float32Array(slice.map((f) => BONDS[f.invest.portfolio]));
     const wk = new Worker(new URL('./bookbrain-worker.js', import.meta.url), { type: 'module' });
-    wk.postMessage({ init: true, layers: brainJson.layers, X, B, EQ });
+    wk.postMessage({ init: true, layers: brainJson.layers, X, B, EQ, BD });
     pool.push({ wk, lo, hi });
   }
 }
 
 /** Run the Book Brain over every household at this market (all workers in parallel). */
-async function score(spx) {
+async function score(spx, bond = 0) {
   const t0 = performance.now(), id = ++poolSeq, n = S.book.length;
   const parts = await Promise.all(pool.map(({ wk, lo }) => new Promise((res) => {
     const on = ({ data }) => { if (data.id === id) { wk.removeEventListener('message', on); res([lo, data.out]); } };
     wk.addEventListener('message', on);
-    wk.postMessage({ spx, id });
+    wk.postMessage({ spx, bond, id });
   })));
   const probs = new Float32Array(n * NH);
   for (const [lo, out] of parts) probs.set(out, lo * NH);
   S.probs = probs;
   S.ms = performance.now() - t0;
-  S.spx = spx;
+  S.spx = spx; S.bond = bond;
 }
 
 const pOf = (i, h = 0) => S.probs[i * NH + h];
@@ -108,8 +109,8 @@ $('#eps').addEventListener('click', (e) => {
   play(true);
 });
 
-function setEpisode(k) {
-  S.ep = k; S.i = 0; S.playing = false; S.manual = false;
+function setEpisode(k, atEnd) {
+  S.ep = k; S.i = atEnd ? S.eps[k].close.length - 1 : 0; S.playing = false; S.manual = false;
   document.querySelectorAll('#eps button').forEach((b) => b.classList.toggle('on', +b.dataset.ep === k));
   $('#epNote').textContent = S.eps[k].note;
   $('#play').textContent = '▶';
@@ -158,8 +159,8 @@ let busy = false, queued = null;
 async function frame(manualSpx) {
   if (busy) { queued = manualSpx ?? null; return; }
   busy = true;
-  const spx = manualSpx != null ? manualSpx : epSpx(S.ep, S.i);
-  await score(spx);
+  const spx = manualSpx != null ? manualSpx : epSpx(S.ep, S.i), bond = manualSpx != null ? 0 : S.eps[S.ep].bond[S.i];
+  await score(spx, bond);
   busy = false;
   if (manualSpx == null) $('#spx').value = Math.round(spx * 100);
   renderMarket();
@@ -175,7 +176,7 @@ function renderMarket() {
   const el = $('#spxMove');
   el.textContent = pctS(spx);
   el.style.color = spx < -0.1 ? 'var(--coral)' : spx < 0 ? 'var(--amber)' : spx > 0 ? 'var(--good)' : 'var(--text)';
-  $('#spxDate').textContent = S.manual ? 'S&P 500, moved by hand' : `S&P 500 on ${fmtDate(e.dates[S.i])}, since ${fmtDate(e.dates[0])}`;
+  $('#spxDate').textContent = S.manual ? 'S&P 500, moved by hand (bonds held flat)' : `S&P 500 on ${fmtDate(e.dates[S.i])}, since ${fmtDate(e.dates[0])} · bonds ${pctS(e.bond[S.i])} (10-year yield ${e.yield10[S.i].toFixed(2)}%)`;
   const c = e.close, W = 600, H = 90, lo = Math.min(...c), hi = Math.max(...c);
   const X = (i) => (i / (c.length - 1)) * W, Y = (v) => H - 6 - ((v - lo) / (hi - lo || 1)) * (H - 12);
   const pts = c.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
@@ -192,7 +193,7 @@ const fmtDate = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { m
 
 function flagsFor(i) {
   const f = S.book[i], e = f.engine, out = [];
-  const k = 1 + S.spx * EQUITY[f.invest.portfolio];
+  const k = growth(f, S.spx, S.bond);
   const p = pOf(i), p0 = p0Of(i);
   if (p < 75) out.push({ kind: 'red', short: p0 >= 75 ? 'Fell below 75%' : 'Below 75%' });
   let worst = null;
@@ -238,7 +239,7 @@ function renderStats() {
   }
   const d = below - below0;
   $('#stats').innerHTML = `
-    <div class="bk-stat ${d > 0 ? 'alarm' : ''}"><span class="l">Plans below 75%</span><b>${below.toLocaleString()}</b><div class="d">${d > 0 ? `+${d.toLocaleString()} since the plans were made` : d < 0 ? `${d.toLocaleString()} since the plans were made` : 'same as the day the plans were made'}</div></div>
+    <div class="bk-stat ${d > 0 ? 'alarm' : ''}"><span class="l">Plans below 75%</span><b>${below.toLocaleString()}</b><div class="d">${d > 0 ? `+${d.toLocaleString()} since the plans were made` : d < 0 ? `−${Math.abs(d).toLocaleString()} since the plans were made` : 'same as the day the plans were made'}</div></div>
     <div class="bk-stat ${d > 0 ? 'alarm' : ''}"><span class="l">Money in those plans</span><b>${compact(money)}</b><div class="d">across ${below.toLocaleString()} households</div></div>
     <div class="bk-stat ${roth ? 'good' : ''}"><span class="l">Roth conversion windows open</span><b>${roth.toLocaleString()}</b><div class="d">${roth ? `${compact(rothAmt)} could convert at today's prices` : 'they open when stocks are down 10%+'}</div></div>
     <div class="bk-stat"><span class="l">Guardrail check-ins due</span><b>${guard.toLocaleString()}</b><div class="d">withdrawal rate up 20% or more</div></div>`;
@@ -393,7 +394,7 @@ function levers(f) {
 function renderDetail() {
   const i = S.sel, f = S.book[i], el = $('#detail');
   el.hidden = false;
-  const lv = levers(applyMarket(f, S.spx));
+  const lv = levers(applyMarket(f, S.spx, S.bond));
   const maxPts = Math.max(5, ...lv.list.map((p) => Math.abs(p.pts)));
   const eng = S.engineHeads && S.engineHeads.spx === S.spx ? S.engineHeads.p : null;
   const fl = flagsFor(i);
@@ -417,7 +418,7 @@ function renderDetail() {
         ${roth ? `<p class="fx-cost">Roth window: converting <b>${compact(roth.roth)}</b> this year fills the ${Math.round(roth.rate * 100)}% bracket and stays under the first IRMAA tier (from the engine's ledger). At today's prices that buys ${(1 / roth.k).toFixed(2)}× the shares it would have on the plan date.</p>` : ''}
         <div class="bk-actions">
           <button class="btn" id="checkBtn">${eng ? 'Checked against the engine ✓' : 'Check all of these with the engine'}</button>
-          <a class="btn primary" href="household.html#book:${f.id}:${Math.round(S.spx * 1000) / 1000}">Open the full X-ray →</a>
+          <a class="btn primary" href="household.html#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the full X-ray →</a>
         </div>
       </div>
       <div>
@@ -433,7 +434,7 @@ function renderDetail() {
 }
 
 async function checkOne() {
-  const i = S.sel, f = applyMarket(S.book[i], S.spx), spx = S.spx;
+  const i = S.sel, f = applyMarket(S.book[i], S.spx, S.bond), spx = S.spx;
   $('#checkBtn').textContent = 'Running 7 × 1,000 markets on the engine…';
   const t0 = performance.now();
   const p = await engine({ type: 'heads', plan: toPlan(P, f), evs: headEvents(f) });
@@ -448,10 +449,10 @@ async function checkOne() {
 
 /** The brain nominates, the engine decides: re-run the top red flags on the engine at this market. */
 async function confirmFlags() {
-  const spx = S.spx, top = flagRows().filter((r) => r.tier < 2).slice(0, 16);
+  const spx = S.spx, bond = S.bond, top = flagRows().filter((r) => r.tier < 2).slice(0, 16);
   if (!top.length) { S.conf = { spx, map: new Map() }; return; }
   const items = top.map(({ i, tier, fl }) => {
-    const f = applyMarket(S.book[i], spx), w = fl.find((x) => x.worst);
+    const f = applyMarket(S.book[i], spx, bond), w = fl.find((x) => x.worst);
     return tier === 1 && w ? { plan: toPlan(P, f), ev: headEvents(f)[w.worst.h], i, h: w.worst.h } : { plan: toPlan(P, f), ev: {}, i };
   });
   const ps = await engine({ type: 'checkEv', items: items.map(({ plan, ev }) => ({ plan, ev })) });
@@ -472,9 +473,9 @@ async function spotCheck() {
   for (let i = 0; i < n; i++) if (pOf(i) < 75) flagged.push(i);
   for (let k = 0; k < 6 && flagged.length; k++) pick.push(flagged[Math.floor(Math.random() * flagged.length)]);
   while (pick.length < 12) pick.push(Math.floor(Math.random() * n));
-  const spx = S.spx;
+  const spx = S.spx, bond = S.bond;
   const t0 = performance.now();
-  const plans = pick.map((i) => toPlan(P, applyMarket(S.book[i], spx)));
+  const plans = pick.map((i) => toPlan(P, applyMarket(S.book[i], spx, bond)));
   const ps = await engine({ type: 'check', plans });
   S.engineMs = (performance.now() - t0) / plans.length;
   const gaps = ps.map((p, k) => Math.abs(p - S.probs[pick[k] * NH]));

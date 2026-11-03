@@ -874,14 +874,14 @@ async function startStory() {
 async function boot() {
   ['#verdict', '#breaks', '#fix', '#sens', '#insights'].forEach((s) => ($(s).innerHTML = '<p class="loading">running the engine…</p>'));
   const id = location.hash.slice(1);
-  const m = id.match(/^book:(h\d+|[a-z]+):(-?[\d.]+)$/);
+  const m = id.match(/^book:(h\d+|[a-z]+):(-?[\d.]+)(?::(-?[\d.]+))?$/);
   if (m) {
     const book = await fetch('data/book.json').then((r) => r.json());
     const f = book.households.find((h) => h.id === m[1]);
     if (f) {
-      const spx = +m[2];
-      const note = `From the book${spx ? ` · S&P ${spx > 0 ? '+' : '−'}${Math.abs(spx * 100).toFixed(1)}% since the plan was made` : ''}`;
-      return load(null, applyMarket(f, spx), id, note);
+      const spx = +m[2], bond = +(m[3] || 0);
+      const note = `From the book${spx ? ` · S&P ${spx > 0 ? '+' : '−'}${Math.abs(spx * 100).toFixed(1)}% since the plan was made${bond ? `, bonds ${bond > 0 ? '+' : '−'}${Math.abs(bond * 100).toFixed(1)}%` : ''}` : ''}`;
+      return load(null, applyMarket(f, spx, bond), id, note);
     }
   }
   load(FAMILIES.some((f) => f.id === id) ? id : FAMILIES[0].id);

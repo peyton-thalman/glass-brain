@@ -95,10 +95,16 @@ export function makeBook(n = 4000, seed = 20261103) {
 /** Stock share of each model portfolio (Cash … All equity), from the engine's capital market assumptions. */
 export const EQUITY = [0, 0.25, 0.43, 0.6, 0.75, 0.88, 1];
 
-/** A household's facts after the S&P moves by `spx` (−0.3 = down 30%) from the day the plan was made. Bonds and cash held flat. */
-export function applyMarket(f, spx) {
-  if (!spx) return f;
-  const k = 1 + spx * EQUITY[f.invest.portfolio];
+/** Bond share of each model portfolio, from the same assumptions. */
+export const BONDS = [0, 0.65, 0.52, 0.37, 0.23, 0.11, 0];
+
+/** How much each invested dollar is worth after the S&P moves by `spx` and bonds return `bond` (−0.3 = down 30%). Cash held flat. */
+export const growth = (f, spx, bond = 0) => 1 + spx * EQUITY[f.invest.portfolio] + bond * BONDS[f.invest.portfolio];
+
+/** A household's facts after the market moves from the day the plan was made. */
+export function applyMarket(f, spx, bond = 0) {
+  if (!spx && !bond) return f;
+  const k = growth(f, spx, bond);
   const a = f.accounts;
   return { ...f, accounts: { ...a, ira: a.ira.map((x) => x * k), roth: a.roth * k, taxable: a.taxable * k, basis: a.basis } };
 }

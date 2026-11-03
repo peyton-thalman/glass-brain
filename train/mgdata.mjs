@@ -1,10 +1,11 @@
 // Training data for the Engine Brain: real plans run through the planning engine
-// (train/mg/moneyguide.mjs, bundled from ~/moneyguide/src). A retired married couple built on the engine's
+// (web/js/vendor/moneyguide.js, bundled from ~/moneyguide/src). A retired married couple built on the engine's
 // own Chen sample household, varied across ten facts. Each plan gets a 500-trial Monte Carlo under 2026 law.
 // Runs across all CPU cores with worker threads.
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import os from 'os';
 import fs from 'fs';
+import { ENGINE } from './engine.mjs';
 
 export const FEATURES = [
   // name, lo, hi
@@ -79,10 +80,10 @@ if (isMainThread) {
     wk.on('error', rej);
   })));
   const rows = results.flatMap((r) => r.rows);
-  fs.writeFileSync(new URL('./mg_data.json', import.meta.url), JSON.stringify({ features: FEATURES.map((x) => x[0]), trials, rows }));
+  fs.writeFileSync(new URL('./mg_data.json', import.meta.url), JSON.stringify({ engine: ENGINE, features: FEATURES.map((x) => x[0]), trials, rows }));
   console.log(`${rows.length.toLocaleString()} plans in ${((Date.now() - t0) / 1000).toFixed(0)}s on ${cores} cores`);
 } else {
-  const M = await import('./mg/moneyguide.mjs');
+  const M = await import('../web/js/vendor/moneyguide.js');
   const { count, trials, seed } = workerData;
   const r = rng(seed);
   const rows = [];

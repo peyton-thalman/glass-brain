@@ -8,6 +8,7 @@ import { TaxTab } from './taxtab.js';
 import { MGTab } from './mgtab.js';
 import { LabTab } from './labtab.js';
 import { Finder } from './finder.js';
+import { checkProvenance } from './provenance.js';
 
 const $ = (s) => document.querySelector(s);
 const FEAT = ['age', 'portfolio', 'spending', 'income', 'equity', 'early', 'flex', 'health'];
@@ -741,6 +742,7 @@ let taxTab = null;
 async function openTax() {
   if (!taxTab) {
     const d = await fetch('data/taxbrain.json').then((r) => r.json());
+    checkProvenance([{ label: 'The Tax Brain', data: d }]);
     taxTab = new TaxTab({ left: $('#taxLeft'), right: $('#taxRight'), chart: $('#taxChart'), net: $('#taxNet') }, d);
   }
   if (state.mode === 'tax') taxTab.activate();
@@ -749,6 +751,7 @@ async function openTax() {
 async function attachEngineToBook() {
   if (book.mg) return;
   const [{ MGBrain }, M, { makePlan }, d] = await Promise.all([import('./mgbrain.js'), import('./vendor/moneyguide.js'), import('./mgplan.js'), fetch('data/mgbrain.json').then((r) => r.json())]);
+  checkProvenance([{ label: 'The Engine Brain', data: d }]);
   book.setEngine(new MGBrain(d), (f) => M.simulate(makePlan(M, f), { trials: 500, lite: true }).probability);
   if (state.mode === 'book') book.renderStats(true);
 }
@@ -764,6 +767,7 @@ let finder = null;
 async function openFinder() {
   if (!finder) {
     const [policy, history] = await Promise.all(['rothpolicy', 'history'].map((f) => fetch(`data/${f}.json`).then((r) => r.json())));
+    checkProvenance([{ label: 'Roth Autopilot', data: policy }]);
     finder = new Finder({ left: $('#finderLeft'), right: $('#finderRight'), chart: $('#finderChart') }, { policy, history });
   }
   if (state.mode === 'finder') finder.activate();
@@ -771,6 +775,7 @@ async function openFinder() {
 async function openMG() {
   if (!mgTab) {
     const d = await fetch('data/mgbrain.json').then((r) => r.json());
+    checkProvenance([{ label: 'The Engine Brain', data: d }]);
     mgTab = new MGTab({ left: $('#mgLeft'), right: $('#mgRight'), chart: $('#mgChart') }, d);
   }
   if (state.mode === 'mg') mgTab.activate();

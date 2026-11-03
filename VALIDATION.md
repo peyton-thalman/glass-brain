@@ -33,7 +33,7 @@ Its world is a simple model: normal returns (stocks 6.5% ± 17%, bonds 1.8% ± 6
 | The compiled network equals the engine | **max error $0.000000 on 1,000,000 random returns**, for 2025 and 2026 law. 40 neurons, 93 weights, 8 layers | `node train/compile_check.mjs` |
 | The 2025 → 2026 law change is a weight diff | **11 bias edits** | same |
 | The trained brain fits the engine | **$46** mean error, $150 p95, on 50,000 held-out returns (96 hinges, 3M training returns) | `python3 train/taxtrain.py 96 40 3` |
-| Its hinges land on the law's kinks | e.g. 24%→32% edge **$3** off, 32%→35% **$43**, 0% capital-gains ceiling **$52**, Social Security 85% zone **$809** | `node train/taxread.mjs` |
+| Its hinges land on the law's kinks | across the four income slices the table prints: 24%→32% edge **$3–$273** off, 32%→35% **$43–$380**; 0% capital-gains ceiling **$52**, Social Security 85% zone **$809**. Several small kinks next to bigger ones are not found (shown as NOT FOUND) | `node train/taxread.mjs` |
 | The audit identifies which law a brain learned | our brain → "2026 law as enacted" (score 0.45 vs 0.18 for the runner-up); vendor brain trained without the OBBBA senior deduction → **correctly flagged** (0.39 vs −0.02) | `node train/audit.mjs` |
 | Patching the trained brain for a law change works | switching to 2025 law: error $876 → **$126** after moving 25 hinge biases, no retraining | Tax tab → 2025 → "Patch the trained brain's hinges" |
 
@@ -56,7 +56,7 @@ Scope: married filing jointly, both 65+, federal income tax, with three income t
 | Claim | Measured | How |
 |---|---|---|
 | Gradients are exact | backprop through the compiled network matches finite differences to 3 decimals (−0.559 vs −0.559) | `node train/roth_check.mjs` |
-| Beats the bracket rules (total = tax + IRMAA + heirs) | $2M IRA: **$464,590** vs $534,988 for the best rule. $900k IRA: **$115,431** vs $132,551. $4M IRA, 35% heirs: **$1,333,844** vs $1,854,286 | same |
+| Beats the bracket rules (total = tax + IRMAA + heirs) | $2M IRA: **$464,590** vs $534,988 for the best rule. $900k IRA: **$115,431** vs $132,551. $4M IRA, 35% heirs: **$1,336,869** vs $1,854,286 | same |
 
 Model: deterministic real growth, 2026 law held constant, no discounting, federal tax only, RMDs from 75 (Uniform Lifetime Table), and heirs taxed at a flat rate. IRMAA is counted in every total but is a staircase, so it isn't in the gradient.
 
@@ -78,9 +78,19 @@ Stress model: a single portfolio (stocks and bonds at the family's mix), with wi
 | Claim | Measured | How |
 |---|---|---|
 | Every X-ray number is the engine's | the page calls the planning engine (bundled as `web/js/vendor/planner.js`) in a worker; no surrogate | `node train/xray_check.mjs` prints the four families' headline numbers |
-| Failed historical retirements fail in the first decade | all four families: failed start years averaged −2.5% to −3.1% a year after inflation in years 1–10, and earned more than the successful years after year 10 | same |
-| The Book Brain matches the engine | **1.4 pts** mean error on 3,000 held-out households (1.4–1.8 across the seven scenarios); 90% within 3.9 pts, 99% within 15.6 | `python3 train/booktrain.py` (60,000 households from `train/bookdata.mjs`) |
-| …on the demo book | 4,000 households at the plan date against the engine at 1,000 markets each | the trust panel on `book.html` computes it live |
-| …after a crash | at S&P −34%: 1.5 pts mean, 90% within 4.4, worst 42 pts on 150 random households | spot checks on `book.html`; the worst misses gather among the biggest drops, so the page re-checks the top 16 red flags on the engine whenever the market pauses |
+| Failed historical retirements fail in the first decade | Kowalskis, Joan and the Alvarezes: failed start years lost 2.5% to 3.1% a year after inflation in years 1–10 (vs +3.5% to +5.4% when the plan worked). The Hoffmans overspend, so their failed years still earned **+0.3%** a year in years 1–10 (vs +6.2%). In all four, the failed start years earned more than the successful ones after year 10 | same |
+| The Book Brain matches the engine | **1.26 pts** mean error on 3,750 held-out households (1.2–1.9 across the seven scenarios); 90% within 3.3 pts, 99% within 16.3 | `python3 train/booktrain.py` (75,000 households at 400 markets from `train/bookdata.mjs`, see below) |
+| …including the facts it used to ignore | new households, 150 per segment, vs the engine at 1,000 markets: widow(er) on a larger survivor benefit **0.97 pts** (previous brain 2.24); care policy, on the care scenario **1.68 pts** (previous brain **24.4**, worst miss 100); planned downsizing **1.45 pts** (previous brain 10.4); everyone else 1.26 (previous 1.83) | `node train/bookbrain_check.mjs` |
+| …on the demo book | 4,000 households at the plan date against the engine at 1,000 markets each: **1.1 pts** mean, 90% within 2.8 | the trust panel on `book.html` computes it live |
+| …after a crash | 150 random households from the demo book: S&P −34% with bonds +7%, **1.24 pts** mean, 90% within 2.7; S&P −25% with bonds −17% (2022-style), **1.49 pts**, 90% within 3.2. The worst misses (69 and 94 pts) are cliff-edge plans: thin savings, income almost covering spending | engine vs brain on the same households |
+| The watch list catches the cliff edges | 125 of 4,000 households. Across four markets it wasn't built on (S&P −34%/bonds +7%, −25%/−17%, −10%/0, −45%/−5%) it holds **120 of 121** misses over 20 pts and **43 of 43** red flags the brain alone would hide (engine below 65%, brain 75% or more); the engine re-checks all of them whenever the market pauses | `node train/watch_check.mjs` |
 
-The Book Brain's market model moves only the stock share of each portfolio with the S&P; bonds and cash are held flat.
+The Book Brain's market model moves the stock share of each portfolio with the S&P and the bond share with the 10-year Treasury yield; cash is held flat. Its training data covers S&P moves from −50% to +30% and bond moves from −20% to +10%.
+
+## Provenance
+
+| Claim | Measured | How |
+|---|---|---|
+| The bundles are the engine's current source | fingerprint `06af5bad9d228e3a` over the 10 source files they include (moneyguide `3b7d8bc`); rebuilding is byte-identical apart from the header comment, and the four families' X-ray numbers are unchanged | `node train/vendor/build.mjs --check` |
+| Every brain was labeled by that engine | all six files in `web/data/` that the engine labeled carry the fingerprint; the Engine Brain, both Tax Brains and Roth Autopilot were labeled by bundle code byte-identical to today's, so they were stamped without retraining | `node train/provenance.mjs` (the first step of `validate.sh`) |
+| The Book Brain reads what the page encodes | its stored list of 39 facts equals `FEATURE_NAMES` in `book-model.js` | same; the pages show an "Out of date" banner if either check fails |

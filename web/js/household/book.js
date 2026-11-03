@@ -5,7 +5,8 @@ import { BookBrain } from './bookbrain.js';
 import { applyMarket, features, balances, growth, HEADS, EQUITY, BONDS } from './book-model.js';
 import { toPlan } from './families.js';
 import * as P from '../vendor/planner.js';
-import { headEvents } from './book-model.js';
+import { headEvents, FEATURE_NAMES, WATCH_MARKETS, WATCH_GAP } from './book-model.js';
+import { checkProvenance } from '../provenance.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -24,6 +25,23 @@ let seq = 0;
 worker.onmessage = ({ data }) => { const r = waiting.get(data.id); if (r && data.type !== 'progress') { waiting.delete(data.id); r(data.out); } };
 const engine = (msg) => new Promise((res) => { const id = ++seq; waiting.set(id, res); worker.postMessage({ ...msg, id }); });
 
+// More engine threads for the batch re-checks, so the watch list comes back in about a second instead of several.
+const helpers = Array.from({ length: Math.max(0, Math.min(3, (navigator.hardwareConcurrency || 4) - 3)) }, () => {
+  const w = new Worker(new URL('./xray-worker.js', import.meta.url), { type: 'module' });
+  w.onmessage = worker.onmessage;
+  return w;
+});
+/** Engine probabilities for many { plan, ev } items, split across every engine thread. */
+async function engineMany(items) {
+  const all = [worker, ...helpers], per = Math.ceil(items.length / all.length);
+  const parts = await Promise.all(all.map((w, k) => {
+    const chunk = items.slice(k * per, (k + 1) * per);
+    if (!chunk.length) return [];
+    return new Promise((res) => { const id = ++seq; waiting.set(id, res); w.postMessage({ type: 'checkEv', items: chunk, id }); });
+  }));
+  return parts.flat();
+}
+
 // ---------------------------------------------------------------- state
 
 const S = { book: [], brain: null, eps: [], ep: 0, i: 0, spx: 0, playing: false, probs: null, p0: null, order: [], sel: null, tab: 'flags', checks: [], last: 0, ms: 0 };
@@ -31,6 +49,7 @@ const S = { book: [], brain: null, eps: [], ep: 0, i: 0, spx: 0, playing: false,
 async function boot() {
   $('#stats').innerHTML = '<div class="bk-stat"><span class="l">loading the book and the brain…</span></div>';
   const [book, brain, spx] = await Promise.all(['book', 'bookbrain', 'spx'].map((f) => fetch(`data/${f}.json`).then((r) => r.json())));
+  checkProvenance([{ label: 'The Book Brain', data: brain, features: FEATURE_NAMES }, { label: 'The book\u2019s precomputed engine numbers', data: book }]);
   S.book = book.households;
   S.trials = book.trials;
   S.brain = new BookBrain(brain);
@@ -40,6 +59,13 @@ async function boot() {
   S.inv0 = S.book.map((f) => invested(f));
   S.risky = S.book.map((f) => f.accounts.ira.reduce((t, x) => t + x, 0) + f.accounts.roth + f.accounts.taxable);
   startPool(brain);
+  // The watch list: score the reference markets with the brain and keep every household where it disagrees with the
+  // engine's stored answer. Those are the cliff-edge plans; the engine re-checks all of them whenever the market pauses.
+  S.watch = new Set();
+  for (const [k, [spx, bond]] of WATCH_MARKETS.entries()) {
+    await score(spx, bond);
+    S.book.forEach((f, i) => { if (f.engine.pRef && Math.abs(pOf(i) - f.engine.pRef[k]) > WATCH_GAP) S.watch.add(i); });
+  }
   await score(0);
   S.p0 = S.probs.slice();
   S.order = S.book.map((_, i) => i).sort((a, b) => S.p0[b * NH] - S.p0[a * NH] || a - b);
@@ -80,7 +106,11 @@ function startPool(brainJson) {
 }
 
 /** Run the Book Brain over every household at this market (all workers in parallel). */
-async function score(spx, bond = 0) {
+function score(spx, bond = 0) {
+  // Remember the latest run, so an engine check started mid-move waits for the brain to reach that market first.
+  return (S.scoring = scoreNow(spx, bond));
+}
+async function scoreNow(spx, bond) {
   const t0 = performance.now(), id = ++poolSeq, n = S.book.length;
   const parts = await Promise.all(pool.map(({ wk, lo }) => new Promise((res) => {
     const on = ({ data }) => { if (data.id === id) { wk.removeEventListener('message', on); res([lo, data.out]); } };
@@ -418,7 +448,7 @@ function renderDetail() {
         ${roth ? `<p class="fx-cost">Roth window: converting <b>${compact(roth.roth)}</b> this year fills the ${Math.round(roth.rate * 100)}% bracket and stays under the first IRMAA tier (from the engine's ledger). At today's prices that buys ${(1 / roth.k).toFixed(2)}× the shares it would have on the plan date.</p>` : ''}
         <div class="bk-actions">
           <button class="btn" id="checkBtn">${eng ? 'Checked against the engine ✓' : 'Check all of these with the engine'}</button>
-          <a class="btn primary" href="household.html#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the full X-ray →</a>
+          <a class="btn primary" href="./#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the full X-ray →</a>
         </div>
       </div>
       <div>
@@ -447,26 +477,32 @@ async function checkOne() {
 
 // ---------------------------------------------------------------- trust
 
-/** The brain nominates, the engine decides: re-run the top red flags on the engine at this market. */
+/** The brain nominates, the engine decides: re-run the top red flags, and every household on the watch list, on the engine at this market. */
 async function confirmFlags() {
   const spx = S.spx, bond = S.bond, top = flagRows().filter((r) => r.tier < 2).slice(0, 16);
-  if (!top.length) { S.conf = { spx, map: new Map() }; return; }
   const items = top.map(({ i, tier, fl }) => {
     const f = applyMarket(S.book[i], spx, bond), w = fl.find((x) => x.worst);
     return tier === 1 && w ? { plan: toPlan(P, f), ev: headEvents(f)[w.worst.h], i, h: w.worst.h } : { plan: toPlan(P, f), ev: {}, i };
   });
-  const ps = await engine({ type: 'checkEv', items: items.map(({ plan, ev }) => ({ plan, ev })) });
-  if (S.spx !== spx) return;
+  const inTop = new Set(items.map((x) => x.i));
+  for (const i of S.watch) if (!inTop.has(i)) items.push({ plan: toPlan(P, applyMarket(S.book[i], spx, bond)), ev: {}, i, watch: true });
+  if (!items.length) { S.conf = { spx, map: new Map() }; return; }
+  const ps = await engineMany(items.map(({ plan, ev }) => ({ plan, ev })));
+  if (S.spx !== spx || S.bond !== bond) return;
   const map = new Map();
   items.forEach((x, k) => map.set(x.i, x.h != null ? { v: ps[k], h: x.h } : { p: ps[k] }));
   S.conf = { spx, map };
-  const gaps = items.map((x, k) => Math.abs(ps[k] - (x.h != null ? S.probs[x.i * NH + x.h] : pOf(x.i))));
-  S.flagCheck = { spx, n: gaps.length, mean: gaps.reduce((t, x) => t + x, 0) / gaps.length, kept: flagRows().filter((r) => r.c && r.tier < 2).length };
+  const flags = items.map((x, k) => [x, ps[k]]).filter(([x]) => !x.watch);
+  const gaps = flags.map(([x, p]) => Math.abs(p - (x.h != null ? S.probs[x.i * NH + x.h] : pOf(x.i))));
+  // Red flags the brain would have hidden: watched plans the engine puts below 75% while the brain says 75% or more.
+  const caught = items.filter((x, k) => x.watch && ps[k] < 75 && pOf(x.i) >= 75).length;
+  S.flagCheck = { spx, n: gaps.length, mean: gaps.length ? gaps.reduce((t, x) => t + x, 0) / gaps.length : 0, kept: flagRows().filter((r) => r.c && r.tier < 2).length, watched: items.length - flags.length, caught };
   renderList();
   renderTrust();
 }
 
 async function spotCheck() {
+  await S.scoring;
   await confirmFlags();
   const n = S.book.length, pick = [];
   const flagged = [];
@@ -502,6 +538,7 @@ function renderTrust() {
       <div class="bk-stat"><span class="l">This whole book at the plan date, against the engine at ${S.trials.toLocaleString()} markets each</span><b>${(gap / n).toFixed(1)} pts</b><div class="d">average gap over all ${n.toLocaleString()} households; 90% within ${p90.toFixed(1)} pts</div></div>
       <div class="bk-stat"><span class="l">Speed</span><b>${S.ms.toFixed(0)} ms</b><div class="d">for ${n.toLocaleString()} households × 7 scenarios here${engineMin ? `. The engine in this browser: about ${engineMin.toFixed(0)} minutes` : ''}</div></div>
     </div>
+    <p class="hx-lede" style="margin-top:14px"><b>${S.watch.size.toLocaleString()} households are on a watch list.</b> They're the plans on a cliff edge: thin savings, with income almost covering spending, where a small loss flips the answer. A smooth network can't fully learn an edge that sharp, so wherever the brain disagreed with the engine at a reference crash, the engine re-checks the plan every time the market pauses, and the list shows the engine's answer.${S.flagCheck && S.flagCheck.watched ? ` At S&amp;P ${pctS(S.flagCheck.spx)} that check turned up <b>${S.flagCheck.caught}</b> red flag${S.flagCheck.caught === 1 ? '' : 's'} the brain alone would have missed.` : ''}</p>
     ${lc ? `<p class="hx-lede" style="margin-top:14px">Last live spot check, at S&amp;P ${pctS(lc.spx)}: the engine re-ran ${lc.n} households picked at random (half of them below 75%), and the brain was off by <b>${lc.mean.toFixed(1)} pts</b> on average, ${lc.max.toFixed(0)} at most.${S.flagCheck ? ` It also re-ran the top ${S.flagCheck.n} red flags. There the brain was off by ${S.flagCheck.mean.toFixed(1)} pts on average: the biggest drops are where its rare misses gather, which is why the list shows the engine's numbers once the market pauses.` : ''}</p>` : '<p class="hx-lede" style="margin-top:14px">Every time a replay pauses, the engine re-runs a dozen random households and the top red flags at that market, so the brain is checked live.</p>'}`;
 }
 
@@ -535,7 +572,7 @@ function mondayBrief() {
     const why = r.tier === 0 ? `Plan fell from ${Math.round(p0Of(r.i))}% to ${p}% since it was made.` : `Plan looks fine at ${p}%, but ${w ? headName(f, w.worst.h).replace(/^./, (c) => c.toLowerCase()) : 'one event'} would take it to ${w ? Math.round(r.c && r.c.v != null ? r.c.v : w.worst.v) : '?'}%.`;
     return `<div class="mb-item"><div class="mb-n">${n}</div><div><div class="mb-name">${esc(f.name)}${r.c ? ' <span class="mb-ok">✓ engine-checked</span>' : ''}</div>
       <div class="mb-why">${esc(why)} ${esc(summary(f))}</div><div class="mb-say">${esc(opener(f, r))}</div>
-      <a class="mb-link" href="household.html#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the X-ray to bring to the call →</a></div></div>`;
+      <a class="mb-link" href="./#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the X-ray to bring to the call →</a></div></div>`;
   };
   const opp = (o, n) => {
     const f = S.book[o.i];

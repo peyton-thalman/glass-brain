@@ -5,6 +5,7 @@ import * as P from '../vendor/planner.js';
 import { FAMILIES, toPlan, PORTFOLIO_NAMES, NOW } from './families.js';
 import { eventCatalog, eventsFrom, anyEvent } from './xray-core.js';
 import { applyMarket } from './book-model.js';
+import { checkProvenance } from '../provenance.js';
 
 const $ = (s) => document.querySelector(s);
 const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -877,6 +878,7 @@ async function boot() {
   const m = id.match(/^book:(h\d+|[a-z]+):(-?[\d.]+)(?::(-?[\d.]+))?$/);
   if (m) {
     const book = await fetch('data/book.json').then((r) => r.json());
+    checkProvenance([{ label: 'The book\u2019s precomputed engine numbers', data: book }]);
     const f = book.households.find((h) => h.id === m[1]);
     if (f) {
       const spx = +m[2], bond = +(m[3] || 0);

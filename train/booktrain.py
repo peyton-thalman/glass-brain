@@ -15,7 +15,9 @@ torch.manual_seed(5)
 # python3 train/booktrain.py [data files…]; the extra file holds households scored after a market drop.
 FILES = sys.argv[1:] or ["train/book_data.json", "train/book_data_shock.json"]
 Ds = [json.load(open(f)) for f in FILES]
-D = {"heads": Ds[0]["heads"], "trials": Ds[0]["trials"], "rows": [r for d in Ds for r in d["rows"]]}
+assert len({d.get("engine") for d in Ds}) == 1, "data files were labeled by different engine builds: regenerate them"
+assert len({tuple(d["features"]) for d in Ds}) == 1, "data files encode households differently: regenerate them"
+D = {"engine": Ds[0]["engine"], "features": Ds[0]["features"], "heads": Ds[0]["heads"], "trials": Ds[0]["trials"], "rows": [r for d in Ds for r in d["rows"]]}
 X = np.array([r[0] for r in D["rows"]], dtype=np.float32)
 Y = np.array([r[1] for r in D["rows"]], dtype=np.float32)
 M = (Y >= 0).astype(np.float32)
@@ -33,7 +35,7 @@ layers = []
 for a, b in zip(SIZES, SIZES[1:]):
     layers += [nn.Linear(a, b), nn.SiLU()]
 net = nn.Sequential(*layers[:-1])
-EPOCHS, BS = 300, 512
+EPOCHS, BS = 600, 512
 opt = torch.optim.AdamW(net.parameters(), lr=2e-3, weight_decay=1e-4)
 steps = EPOCHS * math.ceil(len(Xtr) / BS)
 sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=3e-3, total_steps=steps, pct_start=0.05)
@@ -61,7 +63,7 @@ mae, e = error(Xte, Yte, Mte)
 base_err = e[:, 0]
 lin = [m for m in net if isinstance(m, nn.Linear)]
 out = {
-    "heads": D["heads"], "sizes": SIZES, "activation": "silu",
+    "engine": D["engine"], "features": D["features"], "heads": D["heads"], "sizes": SIZES, "activation": "silu",
     "layers": [{"W": np.round(l.weight.detach().numpy(), 5).tolist(), "b": np.round(l.bias.detach().numpy(), 5).tolist()} for l in lin],
     "stats": {
         "households": int(n), "trials": D["trials"], "testHouseholds": int(len(te)),

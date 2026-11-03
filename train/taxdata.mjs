@@ -5,6 +5,7 @@
 // Targets: federal income tax, the marginal rate on the next dollar of ordinary income, and the
 // Medicare IRMAA surcharge (both spouses, annual) that this MAGI triggers two years later.
 import fs from 'fs';
+import { ENGINE } from './engine.mjs';
 import * as T from '../web/js/vendor/taxlaw.js';
 
 export const RANGE = { ord: 600_000, ss: 100_000, ltcg: 300_000 };
@@ -64,5 +65,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     fs.writeFileSync(new URL(`./tax${tag}_${name}_Y.f32`, import.meta.url), Buffer.from(Y.buffer));
     console.log(`${name}: ${count.toLocaleString()} returns`);
   }
+  fs.writeFileSync(new URL(`./tax${tag}_meta.json`, import.meta.url), JSON.stringify({ engine: ENGINE, law: v || 'enacted' }));
   console.log(`done in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }

@@ -1,13 +1,15 @@
 // The demo book for the Book X-ray: the four named families plus 3,996 made-up households, each with the
 // engine's own answer at the plan date (to check the Book Brain against) and this year's tax picture from the
-// engine's ledger (bracket, room left in it, distance to the first Medicare IRMAA tier).
+// engine's ledger (bracket, room left in it, distance to the first Medicare IRMAA tier), plus the engine's answer at
+// each of the watch list's reference markets (WATCH_MARKETS in book-model.js).
 //   node train/bookprep.mjs   → web/data/book.json
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import os from 'os';
 import fs from 'fs';
 import * as P from '../web/js/vendor/planner.js';
 import { FAMILIES, toPlan } from '../web/js/household/families.js';
-import { makeBook } from '../web/js/household/book-model.js';
+import { makeBook, applyMarket, WATCH_MARKETS } from '../web/js/household/book-model.js';
+import { ENGINE } from './engine.mjs';
 
 const N = 4000, TRIALS = 1000;
 
@@ -22,7 +24,7 @@ if (isMainThread) {
   })));
   const extra = parts.flat();
   const households = book.map((f, i) => ({ ...f, engine: extra[i] }));
-  fs.writeFileSync('web/data/book.json', JSON.stringify({ trials: TRIALS, households }));
+  fs.writeFileSync('web/data/book.json', JSON.stringify({ engine: ENGINE, trials: TRIALS, households }));
   const ps = extra.map((e) => e.p);
   console.log(`${book.length} households in ${((Date.now() - t0) / 1000).toFixed(0)}s; below 75%: ${ps.filter((p) => p < 75).length}`);
 } else {
@@ -32,8 +34,9 @@ if (isMainThread) {
     const row = P.simulate(plan, { trials: 1, lite: true }).rows[0];
     const t = row.tax;
     const filing = row.alive[0] && row.alive[1] ? 'mfj' : 'single';
+    const pRef = WATCH_MARKETS.map(([spx, bond]) => P.probability(toPlan(P, applyMarket(f, spx, bond)), { trials: TRIALS, lite: true }));
     return {
-      p,
+      p, pRef,
       rate: t ? t.bracketRate : 0,
       room: t ? Math.round(t.bracketRoom) : 0,
       magi: t ? Math.round(t.magi) : 0,

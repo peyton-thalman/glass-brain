@@ -73,12 +73,20 @@ export function sampleHousehold(r, id, wr = [0.015, 0.075]) {
 
   const last = pick(r, LAST);
   const home = round(250000 + Math.pow(r(), 1.3) * 420000, 5000);
+  // The intake's follow-ups, so the Book Brain learns them: most singles in a 55+ town are widowed, and a widow(er)
+  // can take the survivor benefit on the late spouse's record; some households hold a care policy; some plan to downsize.
+  const marital = couple ? 'married' : weighted(r, [['widowed', 65], ['divorced', 20], ['single', 15]]);
+  const late = marital === 'widowed' ? { first: pick(r, sex0 === 'F' ? FIRST_M : FIRST_F), ssMonthly: round(1000 + r() * 3000, 10) } : null;
+  const ltc = r() < 0.18
+    ? { has: 'yes', daily: round(100 + r() * 250, 10), years: weighted(r, [[2, 20], [3, 40], [4, 15], [5, 15], [6, 10]]), rider: r() < 0.4 }
+    : { has: weighted(r, [['no', 6], ['unsure', 4]]) };
+  const downsize = r() < 0.15;
   return {
     id, name: couple ? `${people[0].first} & ${people[1].first} ${last}` : `${people[0].first} ${last}`,
     tagline: '', story: '',
-    people, pensions,
+    people, pensions, marital, ...(late ? { late } : {}), ltc,
     accounts: { ira, roth, taxable, basis: round(taxable * (0.5 + r() * 0.4), 1000), cash },
-    home: { value: home, open: r() < 0.5, downsize: false, downsizeYear: NOW + 2 + Math.floor(r() * 5), netProceeds: round(home * (0.25 + r() * 0.2), 5000) },
+    home: { value: home, open: r() < 0.5, downsize, downsizeYear: NOW + 1 + Math.floor(r() * 10), netProceeds: round(home * (0.25 + r() * 0.35), 5000) },
     spending: { core, survivorPct: couple ? round(70 + r() * 15, 5) : 100, wants, gifts, legacy },
     invest: { portfolio: weighted(r, [[1, 15], [2, 30], [3, 35], [4, 15], [5, 5]]), fees: Math.round((0.9 + r() * 0.7) * 20) / 20 },
     feelings: { cutOk: weighted(r, [['no', 2], ['some', 5], ['yes', 3]]), priority: weighted(r, [['spend', 4], ['spouse', couple ? 3 : 0], ['legacy', 2]]), worry: weighted(r, [['running-out', 4], ['care', 3], ['market', 2], ['survivor', couple ? 2 : 0]]) },
@@ -101,6 +109,15 @@ export const BONDS = [0, 0.65, 0.52, 0.37, 0.23, 0.11, 0];
 /** How much each invested dollar is worth after the S&P moves by `spx` and bonds return `bond` (−0.3 = down 30%). Cash held flat. */
 export const growth = (f, spx, bond = 0) => 1 + spx * EQUITY[f.invest.portfolio] + bond * BONDS[f.invest.portfolio];
 
+/**
+ * Reference markets for the watch list: [S&P move, bond move]. bookprep.mjs stores the engine's answer at each one; the
+ * Book page scores the same markets with the brain, and wherever the two disagree by more than WATCH_GAP points the
+ * household goes on a watch list the engine always re-checks. These are the cliff-edge plans (thin savings, income
+ * almost covering spending) where a small loss flips the answer, which a smooth network can't fully learn.
+ */
+export const WATCH_MARKETS = [[-0.35, -0.1], [-0.15, 0]];
+export const WATCH_GAP = 10;
+
 /** A household's facts after the market moves from the day the plan was made. */
 export function applyMarket(f, spx, bond = 0) {
   if (!spx && !bond) return f;
@@ -121,6 +138,7 @@ export const FEATURE_NAMES = [
   'IRA', 'Spouse IRA', 'Roth', 'Brokerage', 'Cash', 'Cost basis',
   'Everyday spending', 'Survivor spending', 'Travel & goals', 'Years of goals', 'Gifts', 'Legacy goal',
   'Stock / bond mix', 'Fees',
+  'Care policy benefit', 'Care policy years', 'Care policy inflation rider', 'Downsizing proceeds', 'Years until downsizing',
 ];
 
 /** The trained heads, in output order. `event` is what the X-ray turns on to reproduce each one. */
@@ -154,13 +172,25 @@ export const BALANCE_INPUTS = [[20, 4e6], [21, 2e6], [22, 1.5e6], [23, 3e6]];
 /** Per household: IRA, spouse IRA, Roth, brokerage, and the brokerage's cost basis (input 25 is basis ÷ brokerage). */
 export const balances = (f) => [f.accounts.ira[0] || 0, f.accounts.ira[1] || 0, f.accounts.roth, f.accounts.taxable, f.accounts.basis];
 
+/** Social Security each person's plan runs on: toPlan() gives a widow(er) the larger of their own and the survivor benefit. */
+const ssUsed = (f, i) => {
+  const p = f.people[i];
+  const late = i === 0 && f.people.length === 1 && f.marital === 'widowed' && f.late ? +f.late.ssMonthly || 0 : 0;
+  return Math.max(p.ssMonthly, late);
+};
+
 export function features(f) {
   const [a, b] = f.people;
   const H = (p) => (p ? ['poor', 'average', 'good', 'excellent'].indexOf(p.health) / 1.5 - 1 : 0);
   const pen = (i) => f.pensions.filter((x) => x.owner === i && x.endAge == null);
   const job = f.pensions.filter((x) => x.endAge != null);
   const sum = (xs) => xs.reduce((s, x) => s + x.monthly, 0);
-  const surv = (xs) => (sum(xs) > 0 ? xs.reduce((s, x) => s + x.monthly * x.survivorPct, 0) / sum(xs) / 100 : 0);
+  // A survivor option of "not sure yet" (negative) is planned at 50%, as toPlan() does.
+  const sp = (x) => (x.survivorPct < 0 ? 50 : x.survivorPct);
+  const surv = (xs) => (sum(xs) > 0 ? xs.reduce((s, x) => s + x.monthly * sp(x), 0) / sum(xs) / 100 : 0);
+  // Only a confirmed policy counts, as in toPlan(); "not sure" plans with no policy.
+  const pol = f.ltc && f.ltc.has === 'yes' ? f.ltc : null;
+  const home = f.home || {};
   const all = f.pensions.filter((x) => x.endAge == null);
   const colaShare = sum(all) > 0 ? all.filter((x) => x.cola).reduce((s, x) => s + x.monthly, 0) / sum(all) : 0;
   const jobYears = job.length ? Math.max(...job.map((x) => x.endAge - f.people[x.owner].age)) : 0;
@@ -170,7 +200,7 @@ export function features(f) {
   return [
     lin(a.age, 60, 95), b ? 1 : -1, b ? lin(b.age - a.age, -15, 10) : 0,
     lin(a.planTo - a.age, 0, 40), b ? lin(b.planTo - a.age, 0, 45) : -1, H(a), b ? H(b) : 0,
-    lin(a.ssMonthly, 0, 4000), b ? lin(b.ssMonthly, 0, 4000) : -1,
+    lin(ssUsed(f, 0), 0, 4000), b ? lin(ssUsed(f, 1), 0, 4000) : -1,
     lin(a.claimAge, 62, 70), a.claimAge <= a.age ? 1 : -1, b ? lin(b.claimAge, 62, 70) : 0, b ? (b.claimAge <= b.age ? 1 : -1) : 0,
     lg(sum(pen(0)) * 12, 60000), surv(pen(0)) * 2 - 1, b ? lg(sum(pen(1)) * 12, 40000) : -1, b ? surv(pen(1)) * 2 - 1 : 0, colaShare * 2 - 1,
     lg(sum(job) * 12, 40000), lin(jobYears, 0, 6),
@@ -178,5 +208,7 @@ export function features(f) {
     ac.taxable > 0 ? (2 * Math.min(ac.basis, ac.taxable)) / ac.taxable - 1 : 0,
     lg(s.core * 12, 200000), b ? lin(s.survivorPct, 50, 100) : 1, lg(wantY, 60000), lin(wantN, 0, 15), lg(s.gifts, 30000), lg(s.legacy, 500000),
     lin(f.invest.portfolio, 1, 5), lin(f.invest.fees, 0.5, 2),
+    pol ? lg((+pol.daily || 0) * 365, 150000) : -1, pol ? lin(+pol.years || 0, 0, 6) : -1, pol ? (pol.rider ? 1 : -1) : 0,
+    home.downsize ? lg(home.netProceeds, 600000) : -1, home.downsize ? lin(home.downsizeYear - NOW, 0, 15) : 0,
   ];
 }

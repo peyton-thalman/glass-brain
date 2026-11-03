@@ -9,3 +9,5 @@ __pycache__/
 .DS_Store
 .vercel
 .env*
+train/tax*_meta.json
+train/*.log

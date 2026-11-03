@@ -1,0 +1,23 @@
+{
+  "fingerprint": "06af5bad9d228e3a",
+  "commit": "3b7d8bc",
+  "dirty": false,
+  "builtAt": "2026-11-03",
+  "bundles": {
+    "planner.js": "engine + analysis + insights: the Household, Book and Firm X-ray run on this",
+    "moneyguide.js": "engine/sim.ts + data.ts: the Engine Brain (lab tab 06) is labeled by and checked against this",
+    "taxlaw.js": "engine/tax.ts + law.ts: 2026 and 2025 federal law (IRS Rev. Proc. 2025-32, P.L. 119-21), for the Tax Brain, the compiler and the Roth Lab"
+  },
+  "files": [
+    "src/data.ts",
+    "src/engine/analysis.ts",
+    "src/engine/cma.ts",
+    "src/engine/history.ts",
+    "src/engine/insights.ts",
+    "src/engine/law.ts",
+    "src/engine/mortality.ts",
+    "src/engine/sim.ts",
+    "src/engine/tax.ts",
+    "src/format.ts"
+  ]
+}

@@ -3,6 +3,7 @@
 //   and a network trained on 3M returns that never saw the law (and rediscovered its bends).
 import { TaxBrain, lawKinks, matchKinks, engineTax, engineIrmaa, LAW, ORD_MAX, audit } from './taxread.js';
 import { compileLaw, runCompiled, countCompiled, weightDiff } from './compile.js';
+import { checkProvenance } from './provenance.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const money = (v) => (Math.abs(v) >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.round(v).toLocaleString()}`);
@@ -98,6 +99,7 @@ export class TaxTab {
   async setBrain(which) {
     if (which === 'vendor' && !this.vendor) {
       const d = await fetch('data/taxbrain_no-senior.json').then((r) => r.json());
+      checkProvenance([{ label: 'The vendor Tax Brain', data: d }]);
       this.vendor = new TaxBrain(d);
       this.vendorStats = d.stats;
     }

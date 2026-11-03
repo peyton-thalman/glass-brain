@@ -1,6 +1,9 @@
 // The Firm X-ray: 250 advisors' books (100,000 made-up households) re-scored by the Book Brain as real market
 // history replays. Each worker generates and scores its own advisors; this page only adds up what they report.
 
+import { checkProvenance } from '../provenance.js';
+import { FEATURE_NAMES } from './book-model.js';
+
 const $ = (s) => document.querySelector(s);
 const compact = (n) => {
   const a = Math.abs(n), s = n < 0 ? '−' : '';
@@ -17,6 +20,7 @@ let seq = 0;
 
 async function boot() {
   const [brain, spx] = await Promise.all(['bookbrain', 'spx'].map((f) => fetch(`data/${f}.json`).then((r) => r.json())));
+  checkProvenance([{ label: 'The Book Brain', data: brain, features: FEATURE_NAMES }]);
   S.eps = spx.episodes;
   const W = Math.max(1, Math.min(8, (navigator.hardwareConcurrency || 4) - 1));
   const per = Math.ceil(ADVISORS / W);

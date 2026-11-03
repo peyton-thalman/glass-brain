@@ -3,6 +3,7 @@
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import os from 'os';
 import fs from 'fs';
+import { ENGINE } from './engine.mjs';
 
 export const K = 17; // conversion years the autopilot outputs (age 60 → 76 at most)
 
@@ -42,7 +43,7 @@ if (isMainThread && import.meta.url === `file://${process.argv[1]}`) {
     wk.on('error', rej);
   })));
   const rows = parts.flat();
-  fs.writeFileSync(new URL('./roth_data.json', import.meta.url), JSON.stringify({ K, rows }));
+  fs.writeFileSync(new URL('./roth_data.json', import.meta.url), JSON.stringify({ engine: ENGINE, K, rows }));
   console.log(`${rows.length.toLocaleString()} optimal schedules in ${((Date.now() - t0) / 1000).toFixed(0)}s on ${cores} cores`);
 } else if (!isMainThread) {
   const { makeModel, run, optimize, fillBracket } = await import('../web/js/roth.js');

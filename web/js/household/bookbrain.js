@@ -1,4 +1,4 @@
-// The Book Brain in the browser: a 34 → 128 → 128 → 64 → 7 SiLU network that reads a household's facts and
+// The Book Brain in the browser: a 39 → 128 → 128 → 64 → 7 SiLU network that reads a household's facts and
 // returns the planning engine's probability of success under the plan and six life events, in microseconds.
 
 import { features } from './book-model.js';

@@ -49,6 +49,6 @@ for ep in range(EP):
         print(f"epoch {ep + 1}  mean |error| {e * 100:.2f}% of IRA per year  {time.time() - t0:.0f}s", flush=True)
 
 lin = [m for m in net if isinstance(m, nn.Linear)]
-json.dump({"K": K, "layers": [{"W": np.round(l.weight.detach().numpy(), 5).tolist(), "b": np.round(l.bias.detach().numpy(), 5).tolist()} for l in lin],
+json.dump({"engine": D.get("engine"), "K": K, "layers": [{"W": np.round(l.weight.detach().numpy(), 5).tolist(), "b": np.round(l.bias.detach().numpy(), 5).tolist()} for l in lin],
            "test": te.tolist()[:400], "examples": int(n)}, open("web/data/rothpolicy.json", "w"), separators=(",", ":"))
 print("saved")

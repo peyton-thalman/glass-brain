@@ -1,6 +1,7 @@
 // Training data for the Book Brain: made-up households run through the planning engine under seven scenarios,
 // using the same functions as the Household X-ray (xray-core.js), so every label is what the X-ray would show.
-// Half the households get a random market move first, so the brain sees plans after crashes and rallies.
+// Half the households get a random market move first (stocks and, as in the replays, bonds with the 10-year yield),
+// so the brain sees plans after crashes, rallies and bond sell-offs.
 //   node train/bookdata.mjs [households=40000] [trials=300] [shockShare=0.5] [out=train/book_data.json] [seed=7000]
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import os from 'os';
@@ -8,7 +9,8 @@ import fs from 'fs';
 import * as P from '../web/js/vendor/planner.js';
 import { toPlan } from '../web/js/household/families.js';
 import { prob, eventsFrom } from '../web/js/household/xray-core.js';
-import { rng, sampleHousehold, applyMarket, features, headEvents, HEADS } from '../web/js/household/book-model.js';
+import { rng, sampleHousehold, applyMarket, features, headEvents, HEADS, FEATURE_NAMES } from '../web/js/household/book-model.js';
+import { ENGINE } from './engine.mjs';
 
 if (isMainThread) {
   const n = +(process.argv[2] || 40000), trials = +(process.argv[3] || 300), shock = +(process.argv[4] ?? 0.5);
@@ -25,14 +27,15 @@ if (isMainThread) {
     wk.on('error', rej);
   })));
   const rows = parts.flat();
-  fs.writeFileSync(outFile, JSON.stringify({ heads: HEADS.map((h) => h.id), trials, rows }));
+  fs.writeFileSync(outFile, JSON.stringify({ engine: ENGINE, features: FEATURE_NAMES, heads: HEADS.map((h) => h.id), trials, rows }));
   console.log(`${rows.length.toLocaleString()} households in ${((Date.now() - t0) / 1000).toFixed(0)}s → ${outFile}`);
 } else {
   const { count, trials, shock, seed } = workerData;
   const r = rng(seed), rows = [];
   for (let i = 0; i < count; i++) {
     let f = sampleHousehold(r, 'x');
-    if (r() < shock) f = applyMarket(f, -0.5 + r() * 0.7);
+    // S&P from −50% to +30% (the page's slider range); bonds from −20% to +10% (the replays reach −17% and +7%).
+    if (r() < shock) f = applyMarket(f, -0.5 + r() * 0.8, r() < 0.6 ? -0.2 + r() * 0.3 : 0);
     const plan = toPlan(P, f);
     const y = headEvents(f).map((e) => (e ? prob(P, plan, eventsFrom(e), trials) : -1));
     rows.push([features(f).map((v) => Math.round(v * 1e4) / 1e4), y]);

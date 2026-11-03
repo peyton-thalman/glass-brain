@@ -8,7 +8,7 @@ rate) pushes the bends onto the exact dollar amounts where the law's marginal ra
 A second small brain learns the Medicare IRMAA surcharge, a staircase of cliffs.
 Writes web/data/taxbrain.json.
 """
-import json, sys, time
+import json, os, sys, time
 import numpy as np
 import torch
 import torch.nn as nn
@@ -108,7 +108,9 @@ if __name__ == "__main__":
     with torch.no_grad():
         e_tax = (tax(Xte) * TAX_SCALE - Yte[:, 0]).abs()
         e_irm = (irm(Xte) * TAX_SCALE - Yte[:, 2]).abs()
-    out = {"range": RANGE, "taxScale": TAX_SCALE, "tax": dump(tax), "irmaa": dump(irm),
+    meta = f"train/tax_{TAG}_meta.json" if TAG else "train/tax_meta.json"
+    engine = json.load(open(meta))["engine"] if os.path.exists(meta) else None
+    out = {"engine": engine, "range": RANGE, "taxScale": TAX_SCALE, "tax": dump(tax), "irmaa": dump(irm),
            "stats": {"trainReturns": len(Xtr), "taxMeanErr": float(e_tax.mean()), "taxP95Err": float(e_tax.quantile(0.95)),
                      "irmaaMeanErr": float(e_irm.mean())}}
     if TAG:

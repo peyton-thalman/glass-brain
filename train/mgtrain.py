@@ -71,7 +71,7 @@ with torch.no_grad():
 lin = [m for m in net if isinstance(m, nn.Linear)]
 out = {
     "features": [{"name": n_, "kind": SPEC[n_][0], "lo": SPEC[n_][1], "hi": SPEC[n_][2]} for n_ in names],
-    "logK": LOG_K, "sizes": SIZES, "activation": "silu",
+    "engine": D.get("engine"), "logK": LOG_K, "sizes": SIZES, "activation": "silu",
     "layers": [{"W": np.round(l.weight.detach().numpy(), 5).tolist(), "b": np.round(l.bias.detach().numpy(), 5).tolist()} for l in lin],
     "stats": {"plans": int(n), "trials": D["trials"], "testMAE": float(err.mean()), "testP90": float(err.quantile(0.9))},
 }

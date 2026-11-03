@@ -34,6 +34,18 @@ The whole book, live. 4,000 households (the four named families plus 3,996 made 
 - **Meeting mode** (X-ray page) turns the screen toward the client: big type, "what if…" tiles they can tap, the survivor's monthly income in dollars, and what we could do about it. Esc to leave.
 - **Review brief:** "Print review brief" on the X-ray prints a one-page client and pre-meeting brief.
 
+## Firm X-ray (`firm.html`)
+
+The executive view: 250 advisors in 10 regions, 400 made-up households each (100,000 in all), generated in the browser from a fixed seed inside the worker threads. One tile per advisor, colored by the share of their book below 75%. Replay the 2020 crash, the 2022 bear market or today, and the Book Brain re-scores the whole firm on each step. The page states how long the planning engine itself would need for the same re-score.
+
+## What's new on the household page
+
+- **Show the math:** the engine's year-by-year ledger, and each year's tax return line by line (taxable Social Security, deductions including the senior deduction, bracket and room left, Arizona tax, IRMAA tier), with what the engine is checked against.
+- **Smart intake:** widowed households give the late spouse's details (the engine uses the larger of their own and the survivor benefit), a long-term-care section takes the policy's daily benefit, benefit years and inflation rider (netted out of a care event), and pension survivor options can be "not sure yet."
+- **Ask these first:** every uncertain fact is scored on the engine at its plausible answers, and the intake lists the ones whose answer would move the plan most, with a meter for how much of what matters is confirmed.
+- **Monday brief** (book page): this week's three calls with the reason and an opener, and the top Roth windows in dollars, printable.
+- **Bonds and rates:** replays move bonds with the 10-year Treasury yield (FRED DGS10), and the book opens on Friday's close.
+
 ## Three brains
 
 | Brain | Learned from | What it shows |

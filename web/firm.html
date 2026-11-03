@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firm X-ray</title>
+<meta name="description" content="100,000 retirement plans across 250 advisors, re-scored by a neural network as the real market replays.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="household.css">
+</head>
+<body>
+<header class="hx-top">
+  <a class="hx-brand" href="household.html"><span class="hx-word">Glass Brain</span><span class="hx-sep">/</span><span class="hx-page">Firm X-ray</span></a>
+  <nav class="hx-nav"><a href="household.html">One household</a><a href="book.html">Whole book</a><a href="firm.html" class="on">Whole firm</a><a href="index.html">Under the hood</a></nav>
+  <span class="hx-by">Built by Peyton Thalman</span>
+</header>
+<section class="bk-hero">
+  <div class="hx-card bk-market">
+    <div class="hx-kicker"><span class="n">Live</span> The market</div>
+    <div class="bk-spx">
+      <div><div class="bk-big" id="spxMove">0.0%</div><div class="bk-sub" id="spxDate">generating the firm…</div></div>
+      <button class="bk-play" id="play" aria-label="Play">▶</button>
+    </div>
+    <svg class="bk-spark" id="spark" viewBox="0 0 600 90" preserveAspectRatio="none"></svg>
+    <div class="seg bk-eps" id="eps"></div>
+    <p class="bk-note" id="note"></p>
+  </div>
+  <div class="bk-stats" id="stats"></div>
+</section>
+<section class="hx-card fm-card">
+  <div class="hx-kicker"><span class="n">250</span> advisors in 10 regions · 400 households each</div>
+  <h2 id="head">The whole firm, <em>one tile per advisor</em></h2>
+  <p class="hx-lede">Each tile is an advisor's book; its color is the share of their households below 75%. A neural network trained on the planning engine re-scores every household as the market moves. Hover a tile for the advisor's numbers.</p>
+  <div class="fm-grid" id="grid"></div>
+  <p class="hx-lede" id="speed" style="margin-top:14px"></p>
+</section>
+<footer class="hx-fine bk-foot">All 100,000 households are made up, generated in your browser from a fixed seed. Market moves are real: S&amp;P 500 daily closes and the 10-year Treasury yield from FRED. The Book Brain's scores here are unchecked estimates; on the Whole book page the planning engine re-checks the top flags. Decision support, not advice.</footer>
+<div class="hx-tip" id="tip" hidden></div>
+<script type="module" src="js/household/firm.js"></script>
+</body>
+</html>

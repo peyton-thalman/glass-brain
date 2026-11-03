@@ -58,14 +58,15 @@ async function run(scope) {
     if (!anyEvent(ev)) { S.baseP = v.probability; S.baseVerdict = v; }
     renderVerdict(); renderBreaks(); renderFamilies();
     if (!anyEvent(ev)) renderEvents();
+    renderMeeting();
   });
   const deaths = ev.death.map((a, i) => (a != null ? i : null)).filter((x) => x != null);
-  if (deaths.length) fast({ type: 'cliff', plan: pl, ev, who: deaths[0] }).then((c) => { if (live()) { S.r.cliff = { ...c, who: deaths[0] }; renderCliff(); } });
+  if (deaths.length) fast({ type: 'cliff', plan: pl, ev, who: deaths[0] }).then((c) => { if (live()) { S.r.cliff = { ...c, who: deaths[0] }; renderCliff(); renderMeeting(); } });
   else { S.r.cliff = null; renderCliff(); }
 
-  if (scope === 'facts' || scope === 'ages') slow({ type: 'events', plan: pl, facts, ages: S.ages }).then((e) => { if (live() || scope === 'ages') { S.r.events = Object.fromEntries(e.map((x) => [x.id, x.p])); renderEvents(); } });
+  if (scope === 'facts' || scope === 'ages') slow({ type: 'events', plan: pl, facts, ages: S.ages }).then((e) => { if (live() || scope === 'ages') { S.r.events = Object.fromEntries(e.map((x) => [x.id, x.p])); renderEvents(); renderMeeting(); } });
   S.r.fix = null; S.r.fixStep = 0; renderFix();
-  slow({ type: 'fix', plan: pl, ev, facts }, (s) => { if (live()) { S.r.fixStep = s.step; S.r.fixP = s.p; renderFix(); } }).then((f) => { if (live()) { S.r.fix = f; renderFix(); } });
+  slow({ type: 'fix', plan: pl, ev, facts }, (s) => { if (live()) { S.r.fixStep = s.step; S.r.fixP = s.p; renderFix(); } }).then((f) => { if (live()) { S.r.fix = f; renderFix(); renderMeeting(); } });
   slow({ type: 'sens', plan: pl, ev }).then((s) => { if (live()) { S.r.sens = s; renderSens(); } });
   if (scope === 'facts') slow({ type: 'insights', plan: pl }).then((i) => { if (live()) { S.r.insights = i; renderInsights(); } });
 }
@@ -614,6 +615,96 @@ function printBrief() {
 }
 
 $('#verdict').addEventListener('click', (e) => { if (e.target.closest('[data-brief]')) printBrief(); });
+
+// ---------------------------------------------------------------- meeting mode: the client's side of the desk
+
+const MEET_LABEL = {
+  death: (e, f) => `If ${f.people[e.who].first} passed away at ${e.age}`,
+  ltc: (e, f) => `If ${f.people[0].first} needed care at ${e.age}`,
+  crash: () => 'If markets crashed next year',
+  inflation: () => 'If prices rose faster',
+  ssCut: () => 'If Social Security were cut',
+};
+const meetAge = (e) => S.ages[e.id] ?? e.def;
+
+function meetingEvent() {
+  const id = Object.keys(S.active).find((k) => S.active[k] != null && S.active[k] !== false);
+  return id ? eventCatalog(plan(), S.facts).find((e) => e.id === id) : null;
+}
+
+function renderMeeting() {
+  const el = $('#meeting');
+  if (!S.meeting || !S.facts) { el.hidden = true; return; }
+  el.hidden = false;
+  const f = S.facts, base = S.baseP, v = S.r.verdict, sel = meetingEvent(), ps = S.r.events || {};
+  const nm = f.people.map((p) => p.first).join(' and ');
+  const through = f.people.filter((p, i) => !(sel && sel.kind === 'death' && sel.who === i)).map((p) => `${p.first} is ${p.planTo}`).join(' and ');
+  const now = sel && v ? v.probability : base;
+  const tiles = eventCatalog(plan(), f).map((e) => {
+    const age = meetAge(e), on = sel && sel.id === e.id, p = ps[e.id];
+    return `<button class="mt-tile ${on ? 'on' : ''}" data-meet="${e.id}">
+      <span class="mt-q">${esc(MEET_LABEL[e.kind]({ ...e, age }, f))}</span>
+      ${e.def != null ? `<span class="mt-age"><i data-meet-age="${e.id}" data-d="-1">−</i>age ${age}<i data-meet-age="${e.id}" data-d="1">+</i></span>` : ''}
+      ${p != null && base != null ? `<span class="mt-p">${base} → <b class="${p < 75 ? 'bad' : ''}">${p}</b></span>` : ''}
+    </button>`;
+  }).join('');
+  let story = '';
+  if (sel && v) {
+    const c = S.r.cliff;
+    if (sel.kind === 'death' && c) {
+      const surv = f.people[1 - c.who].first;
+      story = `<p class="mt-say">${esc(surv)}'s guaranteed income would go from <b>${money(c.incomeBefore / 12)}</b> to <b>${money(c.incomeAfter / 12)}</b> a month. Spending only falls to about ${money(c.spendAfter / 12)}, so the difference comes from savings every month.</p>`;
+    } else if (sel.kind === 'ltc') story = `<p class="mt-say">Three years of care at about $110,000 a year, in today's dollars, would come out of savings.</p>`;
+    else if (sel.kind === 'crash') story = `<p class="mt-say">A bad start hurts most because withdrawals keep going while prices are down. The order of returns matters more than the average.</p>`;
+    else if (sel.kind === 'inflation') story = `<p class="mt-say">Spending rises with prices every year; ${f.pensions.some((p) => !p.cola) ? 'a pension without a cost-of-living raise does not.' : 'savings have to cover the gap.'}</p>`;
+    else story = `<p class="mt-say">Benefits would be about a quarter smaller from 2033 if Congress doesn't act before the trust fund runs short.</p>`;
+    const fx = S.r.fix;
+    story += !fx ? '<p class="mt-wait">Finding what we could do…</p>'
+      : fx.changes.length && fx.after > fx.before ? `<div class="mt-fix"><div class="mt-k">What we could do</div><ol>${fx.changes.map((c) => `<li>${esc(c.what)}</li>`).join('')}</ol><div class="mt-fix-p">${fx.before} → <b>${fx.after}</b> out of 100</div></div>`
+      : `<div class="mt-fix"><div class="mt-k">What we could do</div><p>${fx.before >= 85 ? 'The plan holds even then. Nothing needs to change.' : 'This one needs a conversation about other options.'}</p></div>`;
+  }
+  el.innerHTML = `
+    <button class="mt-x" data-meet-exit>Exit meeting mode ✕</button>
+    <div class="mt-head">
+      <div class="mt-name">${esc(nm)}</div>
+      <div class="mt-big"><span class="${now != null && now < 75 ? 'bad' : ''}">${now ?? '…'}</span><small> out of 100</small></div>
+      <div class="mt-cap">${sel ? esc(MEET_LABEL[sel.kind]({ ...sel, age: meetAge(sel) }, f)) + ', in' : 'In'} ${now ?? '…'} out of 100 possible futures, the money lasts until ${esc(through)}.</div>
+      ${sel && base != null ? `<div class="mt-was">Today's plan: ${base} out of 100. <button data-meet="${sel.id}">Back to today</button></div>` : ''}
+    </div>
+    ${story}
+    <div class="mt-k">What if…</div>
+    <div class="mt-tiles">${tiles}</div>`;
+}
+
+function toggleMeeting(on) {
+  S.meeting = on;
+  document.body.classList.toggle('meeting', on);
+  renderMeeting();
+}
+
+$('#meeting').addEventListener('click', (e) => {
+  if (e.target.closest('[data-meet-exit]')) return toggleMeeting(false);
+  const a = e.target.closest('[data-meet-age]');
+  if (a) {
+    const cat = eventCatalog(plan(), S.facts).find((x) => x.id === a.dataset.meetAge);
+    const age = Math.min(cat.max, Math.max(cat.min, meetAge(cat) + +a.dataset.d));
+    S.ages[cat.id] = age;
+    if (S.active[cat.id] != null) S.active[cat.id] = age;
+    renderMeeting(); renderEvents();
+    schedule(S.active[cat.id] != null ? 'ages' : 'agesOnly', 350);
+    return;
+  }
+  const t = e.target.closest('[data-meet]');
+  if (!t) return;
+  const id = t.dataset.meet, was = S.active[id] != null;
+  const cat = eventCatalog(plan(), S.facts).find((x) => x.id === id);
+  S.active = was ? {} : { [id]: cat.def != null ? meetAge(cat) : true };
+  S.r.fix = null;
+  renderEvents(); renderMeeting();
+  schedule('events', 0);
+});
+$('#meetBtn').addEventListener('click', () => toggleMeeting(true));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.meeting) toggleMeeting(false); });
 
 // ---------------------------------------------------------------- story mode: the page drives itself
 

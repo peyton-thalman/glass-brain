@@ -31,6 +31,7 @@ The whole book, live. 4,000 households (the four named families plus 3,996 made 
 - **Red flags** list households that fell below 75%, and the life event that would hurt each one most. **Opportunities** list Roth conversion windows that open when stocks are down at least 10% (sized to fill the bracket and stay under IRMAA, from the engine's ledger), plus guardrail check-ins.
 - **Every answer can be checked.** Click a household to see the brain's seven answers, what would move its plan most (realistic changes, each scored by the brain), and a button that re-runs all seven on the engine. Each pause in a replay re-checks the top 16 red flags on the engine, so the list shows the engine's numbers, plus 12 random households. The trust panel shows test error, the gap on the whole book, and speed.
 - **Story mode** on both pages drives a Loom-ready walkthrough: the Kowalskis' widow cliff, then the whole book through March 2020.
+- **Meeting mode** (X-ray page) turns the screen toward the client: big type, "what if…" tiles they can tap, the survivor's monthly income in dollars, and what we could do about it. Esc to leave.
 - **Review brief:** "Print review brief" on the X-ray prints a one-page client and pre-meeting brief.
 
 ## Three brains

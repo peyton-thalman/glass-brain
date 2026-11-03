@@ -12,7 +12,7 @@ self.onmessage = ({ data: { id, type, plan, plans, items, evs, ev, facts, who, a
   else if (type === 'verdict') out = X.verdict(P, plan, ev);
   else if (type === 'sens') out = X.sensitivity(P, plan, ev);
   else if (type === 'cliff') out = X.survivorCliff(P, plan, ev, who);
-  else if (type === 'events') out = X.eventCatalog(plan, facts).map((e) => ({ id: e.id, p: X.prob(P, plan, X.eventsFrom({ [e.id]: ages[e.id] ?? e.def ?? true }), 600) }));
+  else if (type === 'events') out = X.eventCatalog(plan, facts).map((e) => ({ id: e.id, p: X.prob(P, plan, X.eventsFrom({ [e.id]: ages[e.id] ?? e.def ?? true }), 1000) }));
   else if (type === 'fix') {
     const r = X.gentlestFix(P, plan, ev, facts, 85, (s) => self.postMessage({ id, type: 'progress', out: s }));
     const { plan: q, stress } = X.withEvents(r.plan, ev);

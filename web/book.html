@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book X-ray</title>
+<meta name="description" content="4,000 retirement plans re-scored live as the market moves, by a neural network trained on the MoneyGuide planning engine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="household.css">
+</head>
+<body>
+<header class="hx-top">
+  <a class="hx-brand" href="household.html"><span class="hx-word">Glass Brain</span><span class="hx-sep">/</span><span class="hx-page">Book X-ray</span></a>
+  <nav class="hx-nav"><a href="household.html">One household</a><a href="book.html" class="on">Whole book</a><a href="index.html">Under the hood</a></nav>
+  <button class="btn primary hx-story-btn" id="storyBtn">▶ Story</button>
+  <span class="hx-by">Built by Peyton Thalman</span>
+</header>
+
+<section class="bk-hero">
+  <div class="hx-card bk-market">
+    <div class="hx-kicker"><span class="n">Live</span> The market</div>
+    <div class="bk-spx">
+      <div><div class="bk-big" id="spxMove">0.0%</div><div class="bk-sub" id="spxDate">S&amp;P 500 since the plans were made</div></div>
+      <button class="bk-play" id="play" aria-label="Play">▶</button>
+    </div>
+    <svg class="bk-spark" id="spark" viewBox="0 0 600 90" preserveAspectRatio="none"></svg>
+    <div class="seg bk-eps" id="eps"></div>
+    <label class="bk-slider"><span>Or move it yourself</span><input type="range" id="spx" min="-50" max="30" step="1" value="0"></label>
+    <p class="bk-note" id="epNote"></p>
+  </div>
+  <div class="bk-stats" id="stats"></div>
+</section>
+
+<main class="bk-main">
+  <section class="hx-card bk-field">
+    <div class="hx-kicker"><span class="n">4,000</span> households, one cell each</div>
+    <h2 id="fieldHead">The whole book, <em>re-scored every frame</em></h2>
+    <p class="hx-lede">Each cell is a household, in the same place the whole time, sorted by how safe its plan was on the day it was made. A neural network trained on the MoneyGuide engine re-scores all 4,000 under seven scenarios every time the market moves. Click any cell.</p>
+    <canvas id="field"></canvas>
+    <div class="key" id="fieldKey"></div>
+  </section>
+  <aside class="hx-card bk-flags">
+    <div class="seg bk-tabs" id="tabs"><button data-tab="flags" class="on">Red flags</button><button data-tab="opps">Opportunities</button></div>
+    <div id="flagList" class="bk-list"></div>
+  </aside>
+</main>
+
+<section class="hx-card bk-detail" id="detail" hidden></section>
+
+<section class="hx-card bk-trust" id="trust"></section>
+
+<footer class="hx-fine bk-foot">
+  The households are made up. Market moves come from real S&amp;P 500 daily closes (FRED series SP500). Only the stock share of each
+  portfolio moves with the index; bonds and cash are held flat. Every red flag can be checked against the real engine on its card.
+  This is education and decision support, not personal advice.
+</footer>
+
+<div class="story" id="story" hidden><div class="story-bar"><i id="storyProg"></i></div><div class="story-text" id="storyText"></div><div class="story-foot"><span id="storyStep"></span><span><button id="storyNext">Next →</button><button id="storyEnd">End</button></span></div></div>
+<div class="hx-tip" id="tip" hidden></div>
+<script type="module" src="js/household/book.js"></script>
+</body>
+</html>

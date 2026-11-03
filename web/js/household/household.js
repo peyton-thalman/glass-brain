@@ -4,6 +4,7 @@
 import * as P from '../vendor/planner.js';
 import { FAMILIES, toPlan, PORTFOLIO_NAMES, NOW } from './families.js';
 import { eventCatalog, eventsFrom, anyEvent } from './xray-core.js';
+import { applyMarket } from './book-model.js';
 
 const $ = (s) => document.querySelector(s);
 const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -54,6 +55,7 @@ async function run(scope) {
   fast({ type: 'verdict', plan: pl, ev }).then((v) => {
     if (!live()) return;
     S.r.verdict = v;
+    if (!anyEvent(ev)) { S.baseP = v.probability; S.baseVerdict = v; }
     renderVerdict(); renderBreaks(); renderFamilies();
     if (!anyEvent(ev)) renderEvents();
   });
@@ -85,10 +87,12 @@ $('#families').addEventListener('click', (e) => {
   if (b) load(b.dataset.fam);
 });
 
-function load(id) {
-  const f = FAMILIES.find((x) => x.id === id);
-  S.fam = id; S.facts = clone(f); S.active = {}; S.ages = {}; S.r = {}; S.selYear = null;
-  try { history.replaceState(null, '', '#' + id); } catch {}
+/** Load a named family by id, or any household's facts (from the book) with the hash that brings it back. */
+function load(id, facts, hash, note) {
+  const f = facts || FAMILIES.find((x) => x.id === id);
+  S.fam = facts ? null : id; S.facts = clone(f); S.note = note || '';
+  S.active = {}; S.ages = {}; S.r = {}; S.selYear = null; S.baseP = null; S.baseVerdict = null;
+  try { history.replaceState(null, '', '#' + (hash || id)); } catch {}
   renderFamilies(); renderIntake(); renderEvents();
   run('facts');
 }
@@ -131,7 +135,7 @@ function renderIntake() {
     </div>`).join('') + '<button class="in-add" data-act="addWant">+ Add a goal</button>';
   const fe = f.feelings;
   const html = `
-    <div class="in-story"><h3>${esc(f.name)}</h3>${esc(f.story)}</div>
+    <div class="in-story"><h3>${esc(f.name)}</h3>${S.note ? `<div class="hx-kicker" style="margin:2px 0 6px"><span class="n">${esc(S.note)}</span></div>` : ''}${esc(f.story)}</div>
     ${sec('People', ppl.map((p) => `${esc(p.first)} ${p.age}`).join(' · '), people, true)}
     ${sec('Income', f.pensions.length ? compact(f.pensions.reduce((s, x) => s + x.monthly, 0)) + '/mo + SS' : 'Social Security only', pensions)}
     ${sec('Savings', compact(totalSave), `
@@ -242,6 +246,7 @@ function renderVerdict() {
       <div class="v-num">${v.probability}<small>%</small></div>
       <div class="v-cap">chance the money lasts<br>through ${esc(ages)}${f.spending.legacy > 0 ? `<br>and still leaves ${compact(f.spending.legacy)} to heirs` : ''}</div>
       <span class="v-zone ${zc}">${zl}</span>
+      <div><button class="btn" data-brief style="margin-top:14px">Print review brief</button></div>
     </div>
     <div>
       <div class="hx-kicker">${esc(joinNames(f))} · ${anyEvent(ev0) ? 'the plan if…' : 'the plan today'}</div>
@@ -399,7 +404,7 @@ function renderEventsShell() { renderEvents(); }
 function renderEvents() {
   if (!S.facts) return;
   const cat = eventCatalog(plan(), S.facts);
-  const base = famP[S.fam] ?? null;
+  const base = S.baseP ?? null;
   const ps = S.r.events || {};
   $('#events').innerHTML = `
     <div class="hx-kicker"><span class="n">02</span> Life events</div>
@@ -560,11 +565,161 @@ function renderInsights() {
       <div class="in-card"><div class="cat ${i.kind}">${esc(i.category)}</div><h4>${esc(i.title)}</h4><p>${esc(i.detail)}</p>${i.impact ? `<div class="imp">${esc(i.impact)}</div>` : ''}</div>`).join('') || '<p class="hx-lede">Nothing flagged.</p>'}</div>`;
 }
 
+// ---------------------------------------------------------------- review brief (client one-pager / pre-meeting brief)
+
+function briefQuestions(f, ev) {
+  const nm = names(f), q = [];
+  const single = f.pensions.filter((p) => p.endAge == null && p.survivorPct === 0 && f.people.length === 2);
+  single.forEach((p) => q.push(`Does ${nm[1 - p.owner]} know that ${nm[p.owner]}'s ${p.name.toLowerCase()} stops completely at ${nm[p.owner]}'s death?`));
+  if (ev.ltc != null && ev.ltc < (S.baseP ?? 100) - 25) q.push('If care is needed, how would you want to pay for it: savings, the house, insurance, family?');
+  f.people.forEach((p) => { if (p.claimAge > p.age) q.push(`${p.first} hasn't claimed Social Security yet. Has anything changed about when?`); });
+  if (f.spending.legacy > 0) q.push(`Is leaving ${compact(f.spending.legacy)} a must, or a nice-to-have?`);
+  if (S.r.fix && S.r.fix.changes.some((c) => /guardrails/.test(c.what))) q.push('If markets fall, would you be OK trimming spending 10% for a year or two?');
+  if (f.home.value > 0 && !f.home.open) q.push('Would you ever consider moving somewhere smaller?');
+  q.push('Has anything changed in your health, your family, or what you want to spend on?');
+  return q.slice(0, 6);
+}
+
+function renderBrief() {
+  const f = S.facts, v = S.baseVerdict || S.r.verdict, fx = S.r.fix, evs = S.r.events || {};
+  if (!v) return null;
+  const d = v.diagnosis, nm = names(f);
+  const cat = eventCatalog(plan(), f);
+  const worst = cat.map((e) => ({ e, p: evs[e.id] })).filter((x) => x.p != null).sort((a, b) => a.p - b.p).slice(0, 3);
+  const evLabel = (e) => `${e.label}${e.def != null ? ' ' + (S.ages[e.id] ?? e.def) : ''}`;
+  const ins = (S.r.insights || []).filter((i) => !(f.people.every((p) => p.claimAge <= p.age) && i.category === 'Social Security')).slice(0, 3);
+  const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  return `
+    <div class="br-top"><div><div class="br-k">Plan review brief</div><h1>${esc(f.name)}</h1><div class="br-m">${f.people.map((p) => `${esc(p.first)}, ${p.age}`).join(' · ')} · ${date}</div></div>
+      <div class="br-p"><b>${S.baseP ?? v.probability}%</b><span>chance the money lasts</span></div></div>
+    <h2>Where the plan stands</h2>
+    <p>In 1,000 simulated markets the plan works ${S.baseP ?? v.probability}% of the time. Replayed through every real retirement since 1928, it works in ${d.tested - d.failed} of ${d.tested}.${d.failed ? ` The failures all started with a bad first decade (about ${pct(d.badFirst10)} a year after inflation), even though the years after were good.` : ''}</p>
+    <h2>The three things that would hurt most</h2>
+    <ol>${worst.map(({ e, p }) => `<li><b>${esc(evLabel(e))}:</b> ${p}%</li>`).join('')}</ol>
+    ${fx && fx.changes.length ? `<h2>${anyEvent(events()) ? 'If that happened, the gentlest changes' : 'If we need to strengthen it, the gentlest changes'}</h2><ol>${fx.changes.map((c) => `<li>${esc(c.what)}${c.detail ? ` <span class="br-m">(${esc(c.detail)})</span>` : ''}</li>`).join('')}</ol><p class="br-m">Together: ${fx.before}% → ${fx.after}%${anyEvent(events()) ? `, in the scenario where ${esc(eventLabels().map(([, l]) => l.toLowerCase()).join(' and '))}` : ''}.</p>` : ''}
+    ${ins.length ? `<h2>Worth discussing</h2><ul>${ins.map((i) => `<li><b>${esc(i.title)}.</b> ${esc(i.detail)}</li>`).join('')}</ul>` : ''}
+    <h2>Questions to ask</h2>
+    <ul>${briefQuestions(f, events()).map((q) => `<li>${esc(q)}</li>`).join('')}</ul>
+    <p class="br-fine">Prepared with the MoneyGuide planning engine under 2026 federal law (1,000 simulated markets; historical returns 1928–2025; SSA mortality; Arizona flat tax). Projections are hypothetical, not guarantees. Education and decision support, not personal advice.</p>`;
+}
+
+function printBrief() {
+  const html = renderBrief();
+  if (!html) return;
+  $('#brief').innerHTML = html;
+  document.body.classList.add('printing');
+  const done = () => { document.body.classList.remove('printing'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  window.print();
+}
+
+$('#verdict').addEventListener('click', (e) => { if (e.target.closest('[data-brief]')) printBrief(); });
+
+// ---------------------------------------------------------------- story mode: the page drives itself
+
+const story = { run: 0, skip: false };
+const stillOn = (id) => story.run === id;
+function wait(ms, id) {
+  return new Promise((res) => {
+    const t0 = performance.now();
+    const tick = () => {
+      if (!stillOn(id)) return res(false);
+      if (story.skip) { story.skip = false; return res(true); }
+      if (performance.now() - t0 >= ms) return res(true);
+      setTimeout(tick, 60);
+    };
+    tick();
+  });
+}
+function until(cond, id, ms = 20000) {
+  return new Promise((res) => {
+    const t0 = performance.now();
+    const tick = () => (!stillOn(id) ? res(false) : cond() || performance.now() - t0 > ms ? res(true) : setTimeout(tick, 80));
+    tick();
+  });
+}
+function say(k, n, html) {
+  $('#story').hidden = false;
+  $('#storyText').innerHTML = html;
+  $('#storyStep').textContent = `${k} / ${n}`;
+  $('#storyProg').style.width = `${(k / n) * 100}%`;
+}
+function focusCard(sel) {
+  document.querySelectorAll('.spot').forEach((x) => x.classList.remove('spot'));
+  const el = $(sel);
+  el.classList.add('spot');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function endStory() {
+  story.run++;
+  $('#story').hidden = true;
+  document.querySelectorAll('.spot').forEach((x) => x.classList.remove('spot'));
+}
+$('#storyNext').addEventListener('click', () => (story.skip = true));
+$('#storyEnd').addEventListener('click', endStory);
+$('#storyBtn').addEventListener('click', startStory);
+
+async function startStory() {
+  const id = ++story.run, N = 6;
+  load('kowalski');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  say(1, N, 'Loading Dale and Marilyn Kowalski…');
+  await until(() => S.r.verdict && S.r.events && S.r.fix, id);
+  if (!stillOn(id)) return;
+  const v0 = S.r.verdict, d = v0.diagnosis;
+  focusCard('#verdict');
+  say(1, N, `Meet <b>Dale and Marilyn Kowalski</b>, 78 and 71. Their plan says <b>${v0.probability}%</b>, inside the confidence zone. Most reviews stop here.`);
+  if (!(await wait(6500, id))) return;
+
+  S.selYear = d.worst ? d.worst.year : S.selYear; renderBreaks();
+  focusCard('#breaks');
+  say(2, N, `Replay every retirement since 1928 with real markets. It fails <b>${d.failed} times</b>, all in ${esc(d.eras.map((e) => e.name).join(' and '))}. In those years the portfolio lost <b>${pct(Math.abs(d.badFirst10))} a year</b> for a decade, then earned <b>more</b> than the good years did. It's the order of returns, not the average.`);
+  if (!(await wait(10000, id))) return;
+
+  focusCard('#events');
+  say(3, N, 'Dale took the single-life option on his pension because the check was bigger. What if he dies at 82?');
+  if (!(await wait(3500, id))) return;
+  const box = document.querySelector('[data-ev=death0]');
+  const slider = document.querySelector('[data-age=death0]');
+  if (slider) { slider.value = 82; S.ages.death0 = 82; }
+  if (box && !box.checked) box.click();
+  await until(() => S.r.cliff && S.r.verdict && S.r.verdict !== v0, id);
+  if (!stillOn(id)) return;
+  focusCard('#verdict');
+  say(3, N, `The same plan, if Dale dies at 82: <b>${v0.probability}% → ${S.r.verdict.probability}%</b>. Nothing about the market changed.`);
+  if (!(await wait(5000, id))) return;
+
+  const c = S.r.cliff;
+  focusCard('#cliff');
+  say(4, N, `Here's why. Marilyn's guaranteed income falls <b>${pct((c.incomeBefore - c.incomeAfter) / c.incomeBefore, 0)}</b>: the pension stops and one Social Security check goes away. Her spending only falls <b>${pct((c.spendBefore - c.spendAfter) / c.spendBefore, 0)}</b>, so ${compact(c.iraAfter - c.iraBefore)} more comes out of savings every year.`);
+  if (!(await wait(9000, id))) return;
+
+  await until(() => S.r.fix, id);
+  if (!stillOn(id)) return;
+  const fx = S.r.fix;
+  focusCard('#fix');
+  say(5, N, `Then the engine searches for the least painful fix, weighted by what <b>they</b> said matters: ${esc(fx.changes.map((x) => x.what.toLowerCase()).join(', then '))}. <b>${fx.before}% → ${fx.after}%</b>, checked on the engine. One click prints it as a review brief.`);
+  if (!(await wait(9000, id))) return;
+
+  say(6, N, `That's one household, in about a second. Now watch a whole book of 4,000 live through the 2020 crash.<br><a class="btn primary" style="margin-top:12px" href="book.html?story=1">Watch the whole book →</a>`);
+}
+
 // ---------------------------------------------------------------- boot
 
-function boot() {
+async function boot() {
   ['#verdict', '#breaks', '#fix', '#sens', '#insights'].forEach((s) => ($(s).innerHTML = '<p class="loading">running the engine…</p>'));
   const id = location.hash.slice(1);
+  const m = id.match(/^book:(h\d+|[a-z]+):(-?[\d.]+)$/);
+  if (m) {
+    const book = await fetch('data/book.json').then((r) => r.json());
+    const f = book.households.find((h) => h.id === m[1]);
+    if (f) {
+      const spx = +m[2];
+      const note = `From the book${spx ? ` · S&P ${spx > 0 ? '+' : '−'}${Math.abs(spx * 100).toFixed(1)}% since the plan was made` : ''}`;
+      return load(null, applyMarket(f, spx), id, note);
+    }
+  }
   load(FAMILIES.some((f) => f.id === id) ? id : FAMILIES[0].id);
+  if (new URLSearchParams(location.search).has('story')) setTimeout(startStory, 900);
 }
 boot();

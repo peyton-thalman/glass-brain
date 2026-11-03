@@ -72,3 +72,15 @@ Model: deterministic real growth, 2026 law held constant, no discounting, federa
 | History replay | real 1928–2025 returns and CPI from MoneyGuide's `history.ts`. β's projection rule matches the exact replay in 56–72 of 65–72 windows depending on the plan | same |
 
 Stress model: a single portfolio (stocks and bonds at the family's mix), with withdrawals grossed up for federal tax using the compiled network. The pre-tax share is held constant. No guardrails. Normal shocks are calibrated to 1928–2025 real returns (S&P 8.6% ± 19.3%, Treasuries 1.8% ± 8.9%, correlation 0.09).
+
+## Household X-ray and Book X-ray
+
+| Claim | Measured | How |
+|---|---|---|
+| Every X-ray number is the engine's | the page calls the MoneyGuide engine (bundled as `web/js/vendor/planner.js`) in a worker; no surrogate | `node train/xray_check.mjs` prints the four families' headline numbers |
+| Failed historical retirements fail in the first decade | all four families: failed start years averaged −2.5% to −3.1% a year after inflation in years 1–10, and earned more than the successful years after year 10 | same |
+| The Book Brain matches the engine | **1.4 pts** mean error on 3,000 held-out households (1.4–1.8 across the seven scenarios); 90% within 3.9 pts, 99% within 15.6 | `python3 train/booktrain.py` (60,000 households from `train/bookdata.mjs`) |
+| …on the demo book | 4,000 households at the plan date against the engine at 1,000 markets each | the trust panel on `book.html` computes it live |
+| …after a crash | at S&P −34%: 1.5 pts mean, 90% within 4.4, worst 42 pts on 150 random households | spot checks on `book.html`; the worst misses gather among the biggest drops, so the page re-checks the top 16 red flags on the engine whenever the market pauses |
+
+The Book Brain's market model moves only the stock share of each portfolio with the S&P; bonds and cash are held flat.

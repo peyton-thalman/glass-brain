@@ -8,7 +8,7 @@ python3 serve.py        # → http://localhost:8787
 
 No build step: it's plain HTML, CSS and JS modules in `web/`, deployed as a static site on Vercel (`vercel.json` serves `web/`). Press **▶ Tour** for a 60-second self-driving walkthrough.
 
-The generated training datasets (`train/*.f32`, `*.npz`, `mg_data.json`, `roth_data.json`) are not in git. Rebuild them with the data scripts in `train/` (`taxdata.mjs`, `sim.py`, `mgdata.mjs`, `rothdata.mjs`) before retraining or running `train/validate.sh`.
+The generated training datasets (`train/*.f32`, `*.npz`, `mg_data.json`, `roth_data.json`, `book_data*.json`) are not in git. Rebuild them with the data scripts in `train/` (`taxdata.mjs`, `sim.py`, `mgdata.mjs`, `rothdata.mjs`, `bookdata.mjs`) before retraining or running `train/validate.sh`.
 
 ## Household X-ray (`household.html`)
 
@@ -21,6 +21,17 @@ The front door. Pick one of four made-up households (the kind an advisor meets i
 - **Sensitivity** (one input changed at a time) and the **engine's own insights** (Roth, IRMAA, survivor bracket, Social Security timing).
 
 Code: `web/js/household/` (`families.js` intake → Plan, `xray-core.js` analysis, `xray-worker.js` runs it off the main thread). The engine bundle is `web/js/vendor/planner.js`, rebuilt from `~/moneyguide/src` with `train/vendor/build.sh`. `node train/xray_check.mjs` prints every headline number for the four families.
+
+## Book X-ray (`book.html`)
+
+The whole book, live. 4,000 households (the four named families plus 3,996 made up) sit in a grid, one cell each. Drag the S&P or replay a real episode (the 2020 crash, the 2022 bear market, the last 12 months, from FRED daily closes), and every household is re-scored every frame by the **Book Brain**.
+
+- **The Book Brain** (`train/bookdata.mjs` → `train/booktrain.py` → `web/data/bookbrain.json`) is a 34 → 128 → 128 → 64 → 7 SiLU network. It reads a whole household (ages, health, Social Security claimed or not, pensions and their survivor share, every account, spending, goals, mix, fees). From that it gives the engine's probability of success under seven scenarios: as it is, either spouse dying, three years of care, another crash, the 2033 Social Security cut, and hotter inflation. The training labels come from the Household X-ray's own code on 60,000 made-up households: 40,000 with a market move half the time, plus 20,000 all after a move. Test error is 1.4 points; the rare large misses gather among the biggest drops, which is why the engine confirms the top flags.
+- A market move changes balances (the stock share of each portfolio moves with the S&P), and the brain re-scores. The market is not a separate input.
+- **Red flags** list households that fell below 75%, and the life event that would hurt each one most. **Opportunities** list Roth conversion windows that open when stocks are down at least 10% (sized to fill the bracket and stay under IRMAA, from the engine's ledger), plus guardrail check-ins.
+- **Every answer can be checked.** Click a household to see the brain's seven answers, what would move its plan most (realistic changes, each scored by the brain), and a button that re-runs all seven on the engine. Each pause in a replay re-checks the top 16 red flags on the engine, so the list shows the engine's numbers, plus 12 random households. The trust panel shows test error, the gap on the whole book, and speed.
+- **Story mode** on both pages drives a Loom-ready walkthrough: the Kowalskis' widow cliff, then the whole book through March 2020.
+- **Review brief:** "Print review brief" on the X-ray prints a one-page client and pre-meeting brief.
 
 ## Three brains
 

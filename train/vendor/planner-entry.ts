@@ -6,3 +6,4 @@ export { STRESS_TESTS, sensitivity, suggestScenario, describeChanges, maxSpendin
 export { buildInsights, applyAction } from '../../../../moneyguide/src/engine/insights';
 export { HISTORY } from '../../../../moneyguide/src/engine/history';
 export { historicalReturn, MODEL_PORTFOLIOS, PORTFOLIO_STATS } from '../../../../moneyguide/src/engine/cma';
+export { IRMAA, irmaaTier } from '../../../../moneyguide/src/engine/tax';

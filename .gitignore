@@ -3,6 +3,7 @@ train/*.f32
 train/*.npz
 train/mg_data.json
 train/roth_data.json
+train/book_data*.json
 node_modules/
 __pycache__/
 .DS_Store

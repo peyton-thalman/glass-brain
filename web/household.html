@@ -13,8 +13,9 @@
 <body>
 <header class="hx-top">
   <a class="hx-brand" href="household.html"><span class="hx-word">Glass Brain</span><span class="hx-sep">/</span><span class="hx-page">Household X-ray</span></a>
-  <p class="hx-promise">See inside a retirement plan: what breaks it, why, and the gentlest fix.</p>
-  <a class="hx-hood" href="index.html">Under the hood →</a>
+  <nav class="hx-nav"><a href="household.html" class="on">One household</a><a href="book.html">Whole book</a><a href="index.html">Under the hood</a></nav>
+  <button class="btn primary hx-story-btn" id="storyBtn">▶ Story</button>
+  <span class="hx-by">Built by Peyton Thalman</span>
 </header>
 
 <section class="hx-families" id="families" aria-label="Sample households"></section>
@@ -37,6 +38,8 @@
   </div>
 </main>
 
+<section class="brief" id="brief" hidden></section>
+<div class="story" id="story" hidden><div class="story-bar"><i id="storyProg"></i></div><div class="story-text" id="storyText"></div><div class="story-foot"><span id="storyStep"></span><span><button id="storyNext">Next →</button><button id="storyEnd">End</button></span></div></div>
 <div class="hx-tip" id="tip" hidden></div>
 <script type="module" src="js/household/household.js"></script>
 </body>

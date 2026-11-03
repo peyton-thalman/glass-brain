@@ -10,6 +10,18 @@ No build step: it's plain HTML, CSS and JS modules in `web/`, deployed as a stat
 
 The generated training datasets (`train/*.f32`, `*.npz`, `mg_data.json`, `roth_data.json`) are not in git. Rebuild them with the data scripts in `train/` (`taxdata.mjs`, `sim.py`, `mgdata.mjs`, `rothdata.mjs`) before retraining or running `train/validate.sh`.
 
+## Household X-ray (`household.html`)
+
+The front door. Pick one of four made-up households (the kind an advisor meets in a 55+ town outside Phoenix), edit anything about them, and the real MoneyGuide engine answers: what breaks this plan, why, and the gentlest fix.
+
+- **Deep intake.** Ages and health for each spouse, Social Security already claimed or not, pensions with their survivor option (single-life, 50%, 75%, 100%), part-time work, every account type, the house and whether they'd downsize, everyday spending and what it drops to for a survivor, goals with end dates, gifts, legacy, all-in fees, and *what matters to them*: whether they could trim in a bad year, what they care about most, and their biggest worry.
+- **What breaks it.** Every real start year since 1928 replayed, with real returns and inflation. For all four households, the failures share one cause: the failed retirements averaged −2.5% to −3% a year after inflation in their first decade. After year ten they earned *more* than the retirements that worked. The page says that in plain English and shows each year's path.
+- **Life events.** A spouse dies at an age you choose, three years of care, a crash in years one and two, hotter inflation, the 2033 Social Security cut. Each card shows its effect alone, and toggling it re-runs the whole page. A death opens the **survivor's view**, which compares the last year together with the first year alone: which pension stops, which Social Security check goes, how much more comes out of savings, and the single filer's bracket.
+- **The gentlest fix.** A greedy search over the moves this household said it could live with, weighted by their own answers, with every step checked on the engine. Guardrails come with their cost (how often a cut happens, how deep it goes).
+- **Sensitivity** (one input changed at a time) and the **engine's own insights** (Roth, IRMAA, survivor bracket, Social Security timing).
+
+Code: `web/js/household/` (`families.js` intake → Plan, `xray-core.js` analysis, `xray-worker.js` runs it off the main thread). The engine bundle is `web/js/vendor/planner.js`, rebuilt from `~/moneyguide/src` with `train/vendor/build.sh`. `node train/xray_check.mjs` prints every headline number for the four families.
+
 ## Three brains
 
 | Brain | Learned from | What it shows |

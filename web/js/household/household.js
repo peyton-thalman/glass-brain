@@ -56,7 +56,7 @@ async function run(scope) {
     if (!live()) return;
     S.r.verdict = v;
     if (!anyEvent(ev)) { S.baseP = v.probability; S.baseVerdict = v; }
-    renderVerdict(); renderBreaks(); renderFamilies();
+    renderVerdict(); renderBreaks(); renderFamilies(); renderMath();
     if (!anyEvent(ev)) renderEvents();
     renderMeeting();
   });
@@ -92,7 +92,7 @@ $('#families').addEventListener('click', (e) => {
 function load(id, facts, hash, note) {
   const f = facts || FAMILIES.find((x) => x.id === id);
   S.fam = facts ? null : id; S.facts = clone(f); S.note = note || '';
-  S.active = {}; S.ages = {}; S.r = {}; S.selYear = null; S.baseP = null; S.baseVerdict = null;
+  S.active = {}; S.ages = {}; S.r = {}; S.selYear = null; S.baseP = null; S.baseVerdict = null; S.mathYear = null;
   try { history.replaceState(null, '', '#' + (hash || id)); } catch {}
   renderFamilies(); renderIntake(); renderEvents();
   run('facts');
@@ -525,6 +525,45 @@ function renderFix() {
     ${!r.reached ? `<div class="fx-cost">Couldn't reach 85% within what ${esc(joinNames(f))} said they'd accept. Loosen “What matters” to widen the search.</div>` : ''}`;
 }
 
+// ---------------------------------------------------------------- show the math
+
+function renderMath() {
+  const v = S.r.verdict, el = $('#math'), f = S.facts;
+  if (!v) return;
+  el.classList.remove('busy');
+  const rows = v.rows, sel = S.mathYear ?? rows[0].year;
+  const r = rows.find((x) => x.year === sel) || rows[0];
+  const ages = (x) => f.people.map((p, i) => (x.alive[i] ? x.ages[i] : '†')).join(' / ');
+  const tr = (x) => `<tr class="${x.year === sel ? 'sel' : ''} ${x.shortfall > 1 ? 'short' : ''}" data-my="${x.year}">
+    <td>${x.year}</td><td>${ages(x)}</td><td>${compact(x.ss)}</td><td>${compact(x.pension)}</td><td>${compact(x.fromIra + x.fromOther)}</td>
+    <td>${compact(x.spend)}</td><td>${compact(x.tax)}</td><td>${Math.round(x.rate * 100)}%</td><td>${x.irmaa ? `tier ${x.irmaa}` : '—'}</td><td>${compact(x.end)}</td></tr>`;
+  const t = r.ret, line = (l, val, note = '') => `<div class="mx-l"><span>${l}${note ? `<small>${note}</small>` : ''}</span><b>${val}</b></div>`;
+  el.innerHTML = `
+    <div class="hx-kicker"><span class="n">05</span> Show the math</div>
+    <h2>Every number, <em>all the way down</em>.</h2>
+    <p class="hx-lede">The engine's year-by-year ledger for ${esc(joinNames(f))} in average markets, in today's dollars. Click any year for that year's tax return, line by line.</p>
+    <div class="mx-badges"><span>✓ 2026 brackets and deductions: IRS Rev. Proc. 2025-32 and P.L. 119-21</span><span>✓ Social Security taxation: IRS Pub 915 worksheet</span><span>✓ RMDs: IRS Uniform Lifetime Table</span><span>✓ Medicare IRMAA: CMS 2026 tiers, 2-year lookback</span><span>✓ Federal tax cross-checked against PolicyEngine-US, an independent model</span></div>
+    <div class="mx">
+      <div class="mx-table"><table>
+        <thead><tr><th>Year</th><th>Ages</th><th>Social Security</th><th>Pensions</th><th>From savings</th><th>Spending</th><th>Income tax</th><th>Bracket</th><th>IRMAA</th><th>Invested</th></tr></thead>
+        <tbody>${rows.map(tr).join('')}</tbody></table></div>
+      <div class="mx-ret">
+        <div class="hx-kicker">${r.year} tax return · filing ${r.filing === 'joint' ? 'jointly' : 'single'}</div>
+        ${t ? `${line('Social Security received', money(r.ss))}${line('…of which taxable', money(t.taxableSS), 'Pub 915 provisional-income test')}
+        ${line('Pensions', money(r.pension))}${line('IRA withdrawals and RMDs', money(r.fromIra), r.rmd > 1 ? `RMD ${money(r.rmd)}` : '')}${r.conv > 1 ? line('Roth conversion', money(r.conv)) : ''}${r.gains > 1 ? line('Capital gains and qualified dividends', money(r.gains)) : ''}
+        ${line('Adjusted gross income', money(t.agi))}${line('Standard deduction', '−' + money(t.std), 'includes the 65+ add-on')}${t.senior > 1 ? line('Senior deduction', '−' + money(t.senior), 'OBBBA, phases out above $150k MAGI') : ''}
+        ${line('Taxable income', money(t.taxable))}${line('Tax on ordinary income', money(t.ordinary), `top bracket ${Math.round(r.rate * 100)}%, ${money(t.room)} of room left in it`)}${t.ltcg > 1 ? line('Tax on gains', money(t.ltcg)) : ''}${t.niit > 1 ? line('Net investment income tax', money(t.niit)) : ''}
+        ${line('Federal income tax', money(t.federal))}${line('Arizona income tax', money(t.state), '2.5% flat; Social Security exempt')}
+        ${line('Medicare premiums', money(r.medicare), r.irmaa ? `IRMAA tier ${r.irmaa}, from MAGI two years earlier` : 'standard Part B and D')}
+        <div class="mx-tot">${line('Total tax', money(t.federal + t.state))}</div>` : '<p class="hx-lede">No return this year.</p>'}
+      </div>
+    </div>`;
+}
+$('#math').addEventListener('click', (e) => {
+  const tr = e.target.closest('[data-my]');
+  if (tr) { S.mathYear = +tr.dataset.my; renderMath(); }
+});
+
 // ---------------------------------------------------------------- 04 · sensitivity
 
 function renderSens() {
@@ -536,7 +575,7 @@ function renderSens() {
   const lo = Math.min(...s.rows.map((r) => Math.min(r.lo, r.hi)), s.base), hi = Math.max(...s.rows.map((r) => Math.max(r.lo, r.hi)), s.base);
   const span = Math.max(1, hi - lo), X = (v) => 24 + ((v - lo) / span) * 52;
   el.innerHTML = `
-    <div class="hx-kicker"><span class="n">04</span> What it's most sensitive to</div>
+    <div class="hx-kicker"><span class="n">06</span> What it's most sensitive to</div>
     <h2><em>${esc(top.label)}</em> ${ratio && ratio >= 1.3 ? `moves this plan ${ratio.toFixed(1)}× more than market returns.` : 'matters most.'}</h2>
     <p class="hx-lede">Each row is the engine re-run with one thing changed. Longer bars matter more. Center line: ${s.base}% today.</p>
     <div class="tor">${s.rows.map((r) => {
@@ -559,7 +598,7 @@ function renderInsights() {
   if (!list) return;
   el.classList.remove('busy');
   el.innerHTML = `
-    <div class="hx-kicker"><span class="n">05</span> Also worth a conversation</div>
+    <div class="hx-kicker"><span class="n">07</span> Also worth a conversation</div>
     <h2>What the engine's own review <em>found</em></h2>
     <p class="hx-lede">The planning engine's scan of this household under today's assumptions: Social Security timing, Roth conversions, IRMAA, the survivor's tax bracket, cash reserves.</p>
     <div class="ins">${list.map((i) => `

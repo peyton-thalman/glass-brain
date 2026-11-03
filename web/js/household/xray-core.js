@@ -69,6 +69,8 @@ export function verdict(P, plan, ev) {
       fed: d(r.federalTax), state: d(r.stateTax), tax: d(r.taxes), rate: r.tax ? r.tax.bracketRate : 0,
       rmd: d(r.rmd), fromIra: d(r.fromDeferred + r.rmd), fromOther: d(r.fromCash + r.fromTaxable + r.fromRoth),
       end: d(r.end), shortfall: d(r.shortfall), filing: r.alive[0] && r.alive[1] ? 'joint' : 'single',
+      conv: d(r.rothConversion), gains: d(r.capitalGains),
+      ret: r.tax ? { agi: d(r.tax.agi), magi: d(r.tax.magi), taxableSS: d(r.tax.taxableSS), std: d(r.tax.standardDeduction), senior: d(r.tax.seniorDeduction), deduction: d(r.tax.deduction), taxable: d(r.tax.taxableIncome), ordinary: d(r.tax.ordinaryTax), ltcg: d(r.tax.ltcgTax), niit: d(r.tax.niit), federal: d(r.tax.federal), state: d(r.tax.state), room: d(r.tax.bracketRoom) } : null,
     };
   });
   return {

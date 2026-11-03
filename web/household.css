@@ -467,3 +467,20 @@ body.meeting { overflow: hidden; }
 .ask-s b { color: var(--text); font-weight: 500; }
 .ask-ok { justify-self: start; font: 500 11.5px var(--mono); color: var(--good); margin-top: 2px; }
 .in-req { font: 500 12px var(--mono); color: var(--amber); }
+
+/* Monday brief */
+.bk-monday { margin-left: auto; color: var(--amber) !important; border-color: var(--amber) !important; }
+.mb-head { font: 400 52px/1.05 var(--serif); margin: 6px 0 12px; }
+.mb-sum { font: 400 22px/1.4 var(--serif); color: var(--muted); max-width: 52ch; }
+.mb-sum b { color: var(--amber); font-weight: 400; }
+.mb-item { display: grid; grid-template-columns: 44px 1fr; gap: 12px; border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 12px; background: var(--card); }
+.mb-n { font: 400 34px/1 var(--serif); color: var(--amber); }
+.mb-name { font: 400 26px var(--serif); }
+.mb-ok { font: 500 11px var(--mono); color: var(--good); vertical-align: middle; }
+.mb-why { color: var(--muted); font-size: 15px; margin-top: 4px; }
+.mb-why b { color: var(--text); }
+.mb-say { font: italic 400 20px/1.4 var(--serif); margin-top: 10px; border-left: 2px solid var(--amber); padding-left: 14px; }
+.mb-link { display: inline-block; margin-top: 10px; font: 500 12px var(--mono); color: var(--ice); text-decoration: none; }
+.mb-fine { color: var(--faint); font-size: 12px; margin-top: 18px; }
+.mb-print { position: absolute; top: 14px; right: 140px; }
+@media print { body.printing .brief .mb-item { border: 0; border-top: 1px solid #ddd; border-radius: 0; background: none; } body.printing .brief .mb-say { border-color: #a35c00; } body.printing .brief .mb-link { display: none; } body.printing .brief .mb-head { font-size: 26pt; } }

@@ -505,6 +505,68 @@ function renderTrust() {
     ${lc ? `<p class="hx-lede" style="margin-top:14px">Last live spot check, at S&amp;P ${pctS(lc.spx)}: the engine re-ran ${lc.n} households picked at random (half of them below 75%), and the brain was off by <b>${lc.mean.toFixed(1)} pts</b> on average, ${lc.max.toFixed(0)} at most.${S.flagCheck ? ` It also re-ran the top ${S.flagCheck.n} red flags. There the brain was off by ${S.flagCheck.mean.toFixed(1)} pts on average: the biggest drops are where its rare misses gather, which is why the list shows the engine's numbers once the market pauses.` : ''}</p>` : '<p class="hx-lede" style="margin-top:14px">Every time a replay pauses, the engine re-runs a dozen random households and the top red flags at that market, so the brain is checked live.</p>'}`;
 }
 
+// ---------------------------------------------------------------- Monday-morning brief
+
+function opener(f, row) {
+  const first = f.people.map((p) => p.first).join(' and ');
+  const w = row.fl.find((x) => x.worst), drop = Math.round(p0Of(row.i) - (row.c && row.c.p != null ? row.c.p : pOf(row.i)));
+  if (row.tier === 0) return `"Hi ${first}, with the market where it is I wanted to walk through your plan before you have to wonder about it. It moved about ${drop} points, ${(row.c && row.c.p != null ? row.c.p : pOf(row.i)) < 50 ? 'it needs some changes, and I want to make them with you rather than wait' : "it's still workable, and I have two or three ideas to shore it up"}."`;
+  const id = w && HEADS[w.worst.h].id;
+  if (id === 'death0' || id === 'death1') {
+    const k = id === 'death0' ? 0 : 1, gone = f.people[k].first, surv = f.people[1 - k].first;
+    return `"I'd like to go over what ${surv}'s income would look like if something happened to ${gone}. Your plan handles the markets fine; that's the one scenario it isn't ready for."`;
+  }
+  if (id === 'ltc') return `"Your plan holds up well in the markets. The gap is care: if you ever needed it, how would we pay for it? Let's look at the options while it's an easy conversation."`;
+  if (id === 'crash') return `"Your plan is fine today, but another drop from here would hurt. Let's agree now, while it's calm, on what we'd adjust if it happens."`;
+  return `"Let's spend twenty minutes on your plan. It's in good shape, and there's one scenario worth getting ahead of."`;
+}
+
+function mondayBrief() {
+  const rows = flagRows().filter((r) => r.tier < 2).slice(0, 3);
+  const opps = [];
+  for (let i = 0; i < S.book.length; i++) { const r = flagsFor(i).find((x) => x.roth); if (r) opps.push({ i, r }); }
+  opps.sort((a, b) => b.r.roth - a.r.roth);
+  const top = opps.slice(0, 3), e = S.eps[S.ep];
+  const when = S.manual ? 'this market' : fmtDate(e.dates[S.i]);
+  const assets = rows.reduce((t, r) => t + investedAt(r.i), 0);
+  const rebound = top.reduce((t, o) => t + o.r.roth * (1 / o.r.k - 1), 0);
+  const call = (r, n) => {
+    const f = S.book[r.i], p = Math.round(r.c && r.c.p != null ? r.c.p : pOf(r.i)), w = r.fl.find((x) => x.worst);
+    const why = r.tier === 0 ? `Plan fell from ${Math.round(p0Of(r.i))}% to ${p}% since it was made.` : `Plan looks fine at ${p}%, but ${w ? headName(f, w.worst.h).replace(/^./, (c) => c.toLowerCase()) : 'one event'} would take it to ${w ? Math.round(r.c && r.c.v != null ? r.c.v : w.worst.v) : '?'}%.`;
+    return `<div class="mb-item"><div class="mb-n">${n}</div><div><div class="mb-name">${esc(f.name)}${r.c ? ' <span class="mb-ok">✓ engine-checked</span>' : ''}</div>
+      <div class="mb-why">${esc(why)} ${esc(summary(f))}</div><div class="mb-say">${esc(opener(f, r))}</div>
+      <a class="mb-link" href="household.html#book:${f.id}:${Math.round(S.spx * 1000) / 1000}:${Math.round((S.bond || 0) * 1000) / 1000}">Open the X-ray to bring to the call →</a></div></div>`;
+  };
+  const opp = (o, n) => {
+    const f = S.book[o.i];
+    return `<div class="mb-item"><div class="mb-n">${n}</div><div><div class="mb-name">${esc(f.name)}</div>
+      <div class="mb-why">Convert <b>${compact(o.r.roth)}</b> to Roth this year: it fills the ${Math.round(o.r.rate * 100)}% bracket and stays under IRMAA. At today's prices that buys ${(1 / o.r.k).toFixed(2)}× the shares it would have at the plan date.</div>
+      <div class="mb-say">"Prices are down, which makes this a good year to move some of your IRA to a Roth: same tax bill, more shares, and the rebound on them is never taxed."</div></div></div>`;
+  };
+  const html = `
+    <div class="mt-name">Your week · ${esc(when)}</div>
+    <div class="mb-head">Three calls, ${top.length ? 'three opportunities, ' : ''}and what to say.</div>
+    <p class="mb-sum">These three households cover <b>${compact(assets)}</b> of client assets.${top.length ? ` The three Roth conversions move <b>${compact(top.reduce((t, o) => t + o.r.roth, 0))}</b> into tax-free growth; if stocks recover to where they were, about <b>${compact(rebound)}</b> of rebound lands there untaxed.` : ' Roth windows open when stocks are down 10% or more.'}</p>
+    <div class="mt-k">Calls to make</div>${rows.map((r, n) => call(r, n + 1)).join('') || '<p class="mb-why">No red flags this week.</p>'}
+    ${top.length ? `<div class="mt-k">Opportunities</div>${top.map((o, n) => opp(o, n + 1)).join('')}` : ''}
+    <p class="mb-fine">Ranked by the Book Brain; the top flags are re-checked on the planning engine when the market pauses (✓). Made-up households. Decision support, not advice.</p>`;
+  $('#monday').innerHTML = `<button class="mt-x" data-mb-close>Close ✕</button><button class="btn mb-print" data-mb-print>Print</button>${html}`;
+  $('#monday').hidden = false;
+  document.body.classList.add('meeting');
+  S.mondayHtml = html;
+}
+$('#mondayBtn').addEventListener('click', () => { S.playing = false; mondayBrief(); });
+$('#monday').addEventListener('click', (e) => {
+  if (e.target.closest('[data-mb-close]')) { $('#monday').hidden = true; document.body.classList.remove('meeting'); }
+  if (e.target.closest('[data-mb-print]')) {
+    $('#mbrief').innerHTML = S.mondayHtml;
+    document.body.classList.add('printing');
+    const done = () => { document.body.classList.remove('printing'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    window.print();
+  }
+});
+
 // ---------------------------------------------------------------- story mode
 
 const story = { run: 0, skip: false };
